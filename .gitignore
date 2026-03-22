@@ -2,10 +2,8 @@
 .env.local
 secrets.local
 
-# Internal / source data (stored in Airtable)
-races_2026.csv
-races_2026.md
-*.xlsx
+# Internal source data (stored in Airtable, not for public repo)
+data/
 
 # AI assistant instructions
 CLAUDE.md

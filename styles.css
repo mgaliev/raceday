@@ -120,7 +120,7 @@ body {
 .filters {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .filter-chips {
@@ -193,22 +193,6 @@ body {
   color: var(--text-3);
   margin-left: auto;
   white-space: nowrap;
-}
-
-@media (min-width: 768px) {
-  .filters {
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 16px;
-  }
-  .filter-chips {
-    flex: 1;
-    min-width: 0;
-  }
-  .filter-row2 {
-    flex-shrink: 0;
-  }
 }
 
 /* ── Calendar ────────────────────────────── */
