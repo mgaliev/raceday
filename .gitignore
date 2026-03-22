@@ -5,6 +5,7 @@ secrets.local
 # Internal / source data (stored in Airtable)
 races_2026.csv
 races_2026.md
+*.xlsx
 
 # AI assistant instructions
 CLAUDE.md
