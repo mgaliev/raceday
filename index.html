@@ -1,104 +1,336 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <!-- Yandex.Metrika counter -->
-    <script type="text/javascript">
-        (function(m,e,t,r,i,k,a){
-            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-            m[i].l=1*new Date();
-            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=107730862', 'ym');
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript">
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();
+    for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+    k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=107730862', 'ym');
+    ym(107730862, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+  </script>
+  <noscript><div><img src="https://mc.yandex.ru/watch/107730862" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+  <!-- /Yandex.Metrika counter -->
 
-        ym(107730862, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
-    </script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/107730862" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-    <!-- /Yandex.Metrika counter -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RaceDay — Найди свою гонку</title>
-    <meta name="description" content="RaceDay — агрегатор любительских велогонок в России. Быстро найти гонку и зарегистрироваться.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RaceDay — Календарь велогонок России 2026</title>
+  <meta name="description" content="Все любительские велосипедные старты России в 2026 году: шоссе, гравел, MTB, велокросс, многодневки и байкпакинг.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-inner">
-                <a href="#" class="logo">🚴 RaceDay</a>
-                <a href="#signup" class="header-cta">Зарегистрироваться</a>
+  <header class="header">
+    <div class="container header-inner">
+      <span class="logo">RaceDay</span>
+      <a href="#calendar" class="header-link">Все старты</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1 class="hero-title">Календарь любительских<br>велогонок России</h1>
+      <p class="hero-sub">Шоссе, гравел, MTB, велокросс, многодневки — все старты 2026 года в одном месте</p>
+      <span class="hero-count" id="heroCount">Загрузка…</span>
+    </div>
+  </section>
+
+  <div class="filters-wrap">
+    <div class="container">
+      <div class="filters">
+        <div class="filter-chips" id="disciplineChips"></div>
+        <div class="filter-row2">
+          <div class="filter-selects">
+            <select class="filter-select" id="regionSelect">
+              <option value="">Все регионы</option>
+            </select>
+            <select class="filter-select" id="monthSelect">
+              <option value="">Все месяцы</option>
+            </select>
+          </div>
+          <div class="filter-result" id="filterResult"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="calendar" id="calendar">
+    <div class="container">
+      <div id="calendarContent">
+        <div class="skeleton-wrap">
+          <div class="skeleton-month"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-month" style="margin-top:24px"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Данные обновляются вручную. Перед регистрацией проверяйте актуальность на сайте организатора.</p>
+      <p>© 2026 RaceDay</p>
+    </div>
+  </footer>
+
+  <script>
+    const AIRTABLE_TOKEN = 'patAljGLbreWlHUVA.f5816ce1d7b4e0de450f040b88df2e16a817fe82e966555006c02115f8256ffd';
+    const AIRTABLE_BASE  = 'app2Ho3VmHJhOW63x';
+    const AIRTABLE_TABLE = 'Races';
+
+    const MONTHS_ORDER = [
+      'январь','февраль','март','апрель','май','июнь',
+      'июль','август','сентябрь','октябрь','ноябрь','декабрь'
+    ];
+
+    // Стемы для парсинга дат в родительном падеже ("6 июня" → "июнь")
+    const MONTH_STEMS = [
+      ['январ','январь'], ['феврал','февраль'], ['март','март'],
+      ['апрел','апрель'], ['мая','май'],         ['июн','июнь'],
+      ['июл','июль'],     ['август','август'],   ['сентябр','сентябрь'],
+      ['октябр','октябрь'],['ноябр','ноябрь'],  ['декабр','декабрь'],
+    ];
+
+    const MONTHS_DISPLAY = {
+      'январь':'Январь','февраль':'Февраль','март':'Март',
+      'апрель':'Апрель','май':'Май','июнь':'Июнь',
+      'июль':'Июль','август':'Август','сентябрь':'Сентябрь',
+      'октябрь':'Октябрь','ноябрь':'Ноябрь','декабрь':'Декабрь',
+      'без даты':'Дата уточняется'
+    };
+
+    const DISCIPLINE_FILTERS = [
+      { label: 'Все',        value: '' },
+      { label: 'Гравел',     value: 'гравел' },
+      { label: 'MTB',        value: 'mtb' },
+      { label: 'Шоссе',      value: 'шоссе' },
+      { label: 'Гран Фондо', value: 'гран фондо' },
+      { label: 'Велокросс',  value: 'велокросс' },
+      { label: 'Многодневка',value: 'многодневка' },
+      { label: 'Байкпакинг', value: 'байкпакинг' },
+    ];
+
+    const DISCIPLINE_COLORS = [
+      { key: 'гравел',      bg: '#e8f5e9', color: '#2e7d32' },
+      { key: 'mtb',         bg: '#fff3e0', color: '#e65100' },
+      { key: 'гран фондо',  bg: '#e3f2fd', color: '#1565c0' },
+      { key: 'шоссе',       bg: '#e3f2fd', color: '#1565c0' },
+      { key: 'велокросс',   bg: '#f3e5f5', color: '#6a1b9a' },
+      { key: 'многодневка', bg: '#fce4ec', color: '#c62828' },
+      { key: 'байкпакинг',  bg: '#e0f7fa', color: '#00695c' },
+      { key: 'бревет',      bg: '#f1f8e9', color: '#558b2f' },
+    ];
+
+    const REGION_GROUPS = [
+      { label: 'Москва и МО',        kw: ['москв','подмосков','красногорск','волоколамск','бородино','истра','руза','доброград','белопесоцк','ступин','томилин','клёново','кленово','крылатск','яхром','ильинск','битца','головино','планерная','филино'] },
+      { label: 'Санкт-Петербург',     kw: ['петербург','ленинград','петергоф','гатчин'] },
+      { label: 'Краснодарский край',  kw: ['краснодар','сочи','псебай','красная поляна','сириус','анапа'] },
+      { label: 'Урал',                kw: ['екатеринбург','челябинск','свердловск','тагил','пышма','кыштым','слюдорудник','вишневогорск','озёрск','краснотурьинск','курган','пермь'] },
+      { label: 'Приморье и ДВ',       kw: ['владивосток','уссурийск','партизанск','артём','арт\u00eaм','комсомольск','хабаровск','сахалин'] },
+      { label: 'Сибирь',              kw: ['иркутск','байкал','красноярск','хакасия','белё','емельяново','новосибирск','омск','томск','кемеров'] },
+      { label: 'Северо-Запад',        kw: ['новгород','псков','карелия','мурманск','петрозаводск','архангельск','калинин'] },
+      { label: 'Поволжье',            kw: ['казань','нижний новгород','самар','саратов','пенза','ульяновск','чебоксары','уфа'] },
+      { label: 'Центр',               kw: ['смоленск','тула','калуг','таруса','брянск','орёл','воронеж','курск','белгород','ярославль','переславл','рязань','владимир','иваново','кострома'] },
+      { label: 'Другие регионы',      kw: [] },
+    ];
+
+    let allRaces = [];
+    let activeFilter = { discipline: '', region: '', month: '' };
+
+    function getMonth(dateStr) {
+      if (!dateStr) return 'без даты';
+      const d = dateStr.toLowerCase();
+      for (const [stem, key] of MONTH_STEMS) { if (d.includes(stem)) return key; }
+      return 'без даты';
+    }
+
+    function monthIdx(m) {
+      const i = MONTHS_ORDER.indexOf(m);
+      return i === -1 ? 999 : i;
+    }
+
+    function badgeStyle(discipline) {
+      if (!discipline) return 'background:#f5f5f5;color:#666';
+      const d = discipline.toLowerCase();
+      for (const { key, bg, color } of DISCIPLINE_COLORS) {
+        if (d.includes(key)) return `background:${bg};color:${color}`;
+      }
+      return 'background:#f5f5f5;color:#666';
+    }
+
+    function getRegion(place) {
+      if (!place) return 'Другие регионы';
+      const p = place.toLowerCase();
+      for (const g of REGION_GROUPS) {
+        if (g.kw.length && g.kw.some(k => p.includes(k))) return g.label;
+      }
+      return 'Другие регионы';
+    }
+
+    function renderChips() {
+      const el = document.getElementById('disciplineChips');
+      el.innerHTML = DISCIPLINE_FILTERS.map(f =>
+        `<button class="chip${activeFilter.discipline === f.value ? ' active' : ''}" data-v="${f.value}">${f.label}</button>`
+      ).join('');
+      el.querySelectorAll('.chip').forEach(b => {
+        b.addEventListener('click', () => {
+          activeFilter.discipline = b.dataset.v;
+          renderChips();
+          render();
+        });
+      });
+    }
+
+    // lookup maps: recordId -> name
+    let disciplineMap = {};
+    let locationMap   = {};
+
+    function resolveDiscipline(ids) {
+      if (!ids || !ids.length) return '';
+      return ids.map(id => disciplineMap[id] || id).join(', ');
+    }
+
+    function resolveLocation(ids) {
+      if (!ids || !ids.length) return '';
+      return ids.map(id => locationMap[id] || id).join(', ');
+    }
+
+    function renderCard(r) {
+      const f = r.fields;
+      const discipline = resolveDiscipline(f['Discipline']);
+      const location   = resolveLocation(f['Location']);
+      const link = f['Registration Link'];
+      const hasLink = link && link !== '-' && link !== '';
+      return `
+        <div class="race-card">
+          <div class="race-card-main">
+            <div class="race-name">${f['Race Name'] || '—'}</div>
+            <div class="race-meta">
+              <span class="race-badge" style="${badgeStyle(discipline)}">${discipline}</span>
+              <span class="race-date">${f['Date'] || ''}</span>
+              <span class="race-place">${location}</span>
             </div>
-        </div>
-    </header>
+          </div>
+          ${hasLink
+            ? `<a class="race-link" href="${link}" target="_blank" rel="noopener">Регистрация →</a>`
+            : `<span class="race-link-empty">Скоро</span>`}
+        </div>`;
+    }
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1 class="hero-title">Быстро найти любительскую гонку и зарегистрироваться</h1>
-            <p class="hero-description">
-                Все велогонки России в одном месте. Находите события рядом с вами,
-                выбирайте дистанцию и регистрируйтесь в пару кликов.
-            </p>
-            <a href="#signup" class="btn btn-primary btn-lg">Узнать о запуске первым</a>
-        </div>
-    </section>
+    function render() {
+      const races = filtered();
+      const total = allRaces.length;
 
-    <!-- Problem / Solution -->
-    <section class="problems">
-        <div class="container">
-            <h2 class="section-title">Знакомые проблемы?</h2>
-            <div class="cards">
-                <div class="card">
-                    <div class="card-icon">🔍</div>
-                    <h3 class="card-title">Сложно найти гонку</h3>
-                    <p class="card-text">Информация о гонках разбросана по десяткам сайтов, соцсетей и чатов. Легко пропустить интересное событие.</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">📅</div>
-                    <h3 class="card-title">Неудобная регистрация</h3>
-                    <p class="card-text">Каждый организатор использует свою систему. Приходится заполнять одни и те же данные снова и снова.</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">📍</div>
-                    <h3 class="card-title">Нет фильтров по региону</h3>
-                    <p class="card-text">Хочется найти гонку рядом с домом, но единого календаря с фильтрами по городу и дистанции не существует.</p>
-                </div>
-            </div>
+      document.getElementById('heroCount').textContent = `${total} стартов в 2026 году`;
+      document.getElementById('filterResult').textContent =
+        races.length === total ? `${total} стартов` : `Показано ${races.length} из ${total}`;
 
-            <div class="solution">
-                <h2 class="section-title">RaceDay решает это</h2>
-                <p class="solution-text">
-                    Мы собираем все любительские велогонки в единый каталог с удобным поиском по дате,
-                    региону и дистанции. Один профиль — быстрая регистрация на любое событие.
-                </p>
-            </div>
-        </div>
-    </section>
+      const content = document.getElementById('calendarContent');
 
-    <!-- Signup Form -->
-    <section class="signup" id="signup">
-        <div class="container">
-            <h2 class="section-title">Будьте первыми</h2>
-            <p class="signup-subtitle">Оставьте email и мы сообщим о запуске сервиса</p>
+      if (races.length === 0) {
+        content.innerHTML = `<div class="empty"><p>Ничего не найдено — попробуй изменить фильтры.</p></div>`;
+        return;
+      }
 
-            <div class="google-form-wrapper">
-                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSf1wV96pA3G2mMJnMVDCl2A7OW1y8AFXqamuG3O9ShfRVNTMw/viewform?embedded=true" width="640" height="556" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-            </div>
-        </div>
-    </section>
+      const byMonth = {};
+      for (const r of races) {
+        const m = getMonth(r.fields['Date']);
+        if (!byMonth[m]) byMonth[m] = [];
+        byMonth[m].push(r);
+      }
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p class="footer-contact">Вопросы? Пишите на <a href="mailto:hello@raceday.ru">hello@raceday.ru</a></p>
-            <p class="footer-disclaimer">Это превью сервиса. RaceDay находится в разработке.</p>
-            <p class="footer-copy">&copy; 2026 RaceDay</p>
-        </div>
-    </footer>
+      const sortedMonths = Object.keys(byMonth).sort((a, b) => monthIdx(a) - monthIdx(b));
+
+      content.innerHTML = sortedMonths.map(m => `
+        <div class="month-group">
+          <div class="month-header">${MONTHS_DISPLAY[m] || m}</div>
+          <div class="race-list">${byMonth[m].map(r => renderCard(r)).join('')}</div>
+        </div>`
+      ).join('');
+    }
+
+    async function fetchAll(tableName) {
+      const base = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(tableName)}`;
+      const headers = { Authorization: `Bearer ${AIRTABLE_TOKEN}` };
+      let records = [], offset = null;
+      do {
+        const params = new URLSearchParams({ pageSize: '100' });
+        if (offset) params.set('offset', offset);
+        const res = await fetch(`${base}?${params}`, { headers });
+        if (!res.ok) throw new Error(`${tableName}: ${res.status}`);
+        const data = await res.json();
+        records = records.concat(data.records);
+        offset = data.offset || null;
+      } while (offset);
+      return records;
+    }
+
+    async function init() {
+      try {
+        const [disciplines, locations, races] = await Promise.all([
+          fetchAll('Disciplines'),
+          fetchAll('Locations'),
+          fetchAll('Races'),
+        ]);
+
+        disciplines.forEach(r => { disciplineMap[r.id] = r.fields['Discipline Name'] || ''; });
+        locations.forEach(r => { locationMap[r.id] = r.fields['City'] || r.fields['Location Name'] || ''; });
+
+        allRaces = races;
+        renderChips();
+        renderRegionSelect();
+        renderMonthSelect();
+        render();
+      } catch (err) {
+        document.getElementById('calendarContent').innerHTML =
+          `<div class="empty"><p>Не удалось загрузить данные. Обновите страницу.</p></div>`;
+        console.error('Airtable error:', err);
+      }
+    }
+
+    // filtered() now resolves via maps
+    function filtered() {
+      return allRaces.filter(r => {
+        const f = r.fields;
+        const disc = resolveDiscipline(f['Discipline']);
+        const loc  = resolveLocation(f['Location']);
+        const ok_d = !activeFilter.discipline || disc.toLowerCase().includes(activeFilter.discipline);
+        const ok_r = !activeFilter.region  || getRegion(loc) === activeFilter.region;
+        const ok_m = !activeFilter.month   || getMonth(f['Date']) === activeFilter.month;
+        return ok_d && ok_r && ok_m;
+      });
+    }
+
+    function renderRegionSelect() {
+      const regions = [...new Set(allRaces.map(r => getRegion(resolveLocation(r.fields['Location']))))].sort();
+      const sel = document.getElementById('regionSelect');
+      const cur = activeFilter.region;
+      sel.innerHTML = '<option value="">Все регионы</option>' +
+        regions.map(r => `<option value="${r}"${r === cur ? ' selected' : ''}>${r}</option>`).join('');
+      sel.onchange = () => { activeFilter.region = sel.value; render(); };
+    }
+
+    function renderMonthSelect() {
+      const months = [...new Set(allRaces.map(r => getMonth(r.fields['Date'])))];
+      months.sort((a, b) => monthIdx(a) - monthIdx(b));
+      const sel = document.getElementById('monthSelect');
+      const cur = activeFilter.month;
+      sel.innerHTML = '<option value="">Все месяцы</option>' +
+        months.map(m => `<option value="${m}"${m === cur ? ' selected' : ''}>${MONTHS_DISPLAY[m] || m}</option>`).join('');
+      sel.onchange = () => { activeFilter.month = sel.value; render(); };
+    }
+
+    init();
+  </script>
 
 </body>
 </html>
