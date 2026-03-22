@@ -1,3 +1,11 @@
 .DS_Store
 .env.local
 secrets.local
+
+# Internal / source data (stored in Airtable)
+races_2026.csv
+races_2026.md
+
+# AI assistant instructions
+CLAUDE.md
+.claude/
