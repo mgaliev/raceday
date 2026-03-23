@@ -232,7 +232,7 @@ def cmd_import(args, client, cache):
     """Handle 'import' subcommand — bulk load races from CSV."""
     added = updated = skipped = created_new = 0
 
-    with open(args.file, newline='', encoding='utf-8') as f:
+    with open(args.file, newline='', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f)
         for row_num, row in enumerate(reader, start=2):
             name = row.get('name', '').strip()
@@ -267,11 +267,17 @@ def cmd_import(args, client, cache):
                 continue
 
             # Resolve discipline and location
-            disc_id, disc_new = cache.resolve_discipline(row.get('discipline', '').strip(), client)
+            disc_name = row.get('discipline', '').strip()
+            loc_name = row.get('location', '').strip()
+            if not disc_name or not loc_name:
+                print(f"Строка {row_num} ({name}): дисциплина и локация обязательны — пропуск.")
+                skipped += 1
+                continue
+            disc_id, disc_new = cache.resolve_discipline(disc_name, client)
             if disc_id is None:
                 skipped += 1
                 continue
-            loc_id, loc_new = cache.resolve_location(row.get('location', '').strip(), client)
+            loc_id, loc_new = cache.resolve_location(loc_name, client)
             if loc_id is None:
                 skipped += 1
                 continue
