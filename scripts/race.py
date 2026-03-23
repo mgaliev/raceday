@@ -344,5 +344,46 @@ class AirtableClient:
         return self._do_request(req)
 
 
+def main():
+    parser = argparse.ArgumentParser(
+        prog='race.py',
+        description='RaceDay — управление гонками в Airtable'
+    )
+    sub = parser.add_subparsers(dest='command', required=True)
+
+    # add
+    p_add = sub.add_parser('add', help='Добавить одну гонку')
+    p_add.add_argument('--name', required=True, help='Название гонки')
+    p_add.add_argument('--date', default=None, help='Дата в формате ГГГГ-ММ-ДД (необязательно)')
+    p_add.add_argument('--discipline', required=True, help='Дисциплина (например: Гревел, MTB)')
+    p_add.add_argument('--location', required=True, help='Город/место проведения')
+    p_add.add_argument('--link', default=None, help='Ссылка на регистрацию (необязательно)')
+
+    # update
+    p_upd = sub.add_parser('update', help='Обновить существующую гонку по record ID')
+    p_upd.add_argument('record_id', help='Airtable record ID (recXXXXXXXXXXXXXX)')
+    p_upd.add_argument('--name', default=None)
+    p_upd.add_argument('--date', default=None, help='Формат ГГГГ-ММ-ДД')
+    p_upd.add_argument('--link', default=None)
+    p_upd.epilog = 'Для изменения дисциплины/локации используйте Airtable UI.'
+
+    # import
+    p_imp = sub.add_parser('import', help='Bulk-импорт гонок из CSV')
+    p_imp.add_argument('file', help='Путь к CSV файлу')
+
+    args = parser.parse_args()
+    cfg = load_config()
+    client = AirtableClient(cfg['AIRTABLE_TOKEN_WRITE'], cfg['AIRTABLE_BASE'])
+
+    if args.command == 'update':
+        cmd_update(args, client)
+    else:
+        cache = Cache(client)
+        if args.command == 'add':
+            cmd_add(args, client, cache)
+        elif args.command == 'import':
+            cmd_import(args, client, cache)
+
+
 if __name__ == '__main__':
-    pass
+    main()
