@@ -188,11 +188,19 @@ body {
   border-color: var(--accent);
 }
 
-.filter-result {
-  font-size: 0.75rem;
-  color: var(--text-3);
-  margin-left: auto;
-  white-space: nowrap;
+.filter-search {
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: var(--text);
+  background: #fff;
+  min-width: 200px;
+  outline: none;
+}
+.filter-search:focus {
+  border-color: var(--accent);
 }
 
 /* ── Calendar ────────────────────────────── */

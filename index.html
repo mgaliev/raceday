@@ -132,6 +132,7 @@
       <div class="filters">
         <div class="filter-chips" id="disciplineChips"></div>
         <div class="filter-row2">
+          <input class="filter-search" id="searchInput" type="search" placeholder="Поиск по названию…">
           <div class="filter-selects">
             <select class="filter-select" id="regionSelect">
               <option value="">Все регионы</option>
@@ -140,7 +141,6 @@
               <option value="">Все месяцы</option>
             </select>
           </div>
-          <div class="filter-result" id="filterResult"></div>
         </div>
       </div>
     </div>
@@ -231,7 +231,7 @@
     ];
 
     let allRaces = [];
-    let activeFilter = { discipline: '', region: '', month: '' };
+    let activeFilter = { discipline: '', region: '', month: '', search: '' };
 
     function getMonth(dateStr) {
       if (!dateStr) return 'без даты';
@@ -324,8 +324,6 @@
       const total = allRaces.length;
 
       document.getElementById('heroCount').textContent = `${total} стартов в 2026 году`;
-      document.getElementById('filterResult').textContent =
-        races.length === total ? `${total} стартов` : `Показано ${races.length} из ${total}`;
 
       const content = document.getElementById('calendarContent');
 
@@ -385,6 +383,7 @@
         renderChips();
         renderRegionSelect();
         renderMonthSelect();
+        initSearch();
         render();
       } catch (err) {
         document.getElementById('calendarContent').innerHTML =
@@ -402,7 +401,8 @@
         const ok_d = !activeFilter.discipline || disc.toLowerCase().includes(activeFilter.discipline);
         const ok_r = !activeFilter.region  || getRegion(loc) === activeFilter.region;
         const ok_m = !activeFilter.month   || getMonth(f['Date']) === activeFilter.month;
-        return ok_d && ok_r && ok_m;
+        const ok_s = !activeFilter.search  || (f['Race Name'] || '').toLowerCase().includes(activeFilter.search.toLowerCase());
+        return ok_d && ok_r && ok_m && ok_s;
       });
     }
 
@@ -413,6 +413,11 @@
       sel.innerHTML = '<option value="">Все регионы</option>' +
         regions.map(r => `<option value="${r}"${r === cur ? ' selected' : ''}>${r}</option>`).join('');
       sel.onchange = () => { activeFilter.region = sel.value; render(); };
+    }
+
+    function initSearch() {
+      const el = document.getElementById('searchInput');
+      el.oninput = () => { activeFilter.search = el.value.trim(); render(); };
     }
 
     function renderMonthSelect() {
