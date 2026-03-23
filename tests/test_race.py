@@ -356,8 +356,9 @@ class TestCmdUpdate(unittest.TestCase):
         args.date = None
         args.link = None
 
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(SystemExit) as cm:
             cmd_update(args, client)
+        self.assertEqual(cm.exception.code, 1)
 
 
 if __name__ == '__main__':

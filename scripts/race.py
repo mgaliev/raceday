@@ -256,7 +256,9 @@ def cmd_import(args, client, cache):
                 answer = input(f'"{name}" уже существует. [u]pdate / [s]kip: ').strip().lower()
                 if answer == 'u':
                     fields = _build_fields(name, date_str, link_str, None, None)
-                    client.patch('Races', existing['id'], fields)
+                    result = client.patch('Races', existing['id'], fields)
+                    # Update cached record so subsequent duplicate checks see latest state
+                    existing['fields'].update(fields)
                     updated += 1
                     print(f'  Обновлено: "{name}"')
                 else:
