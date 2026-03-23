@@ -8,3 +8,6 @@ data/
 # AI assistant instructions
 CLAUDE.md
 .claude/
+
+# Git worktrees
+.worktrees/
