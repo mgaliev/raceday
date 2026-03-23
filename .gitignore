@@ -15,3 +15,7 @@ CLAUDE.md
 # Python
 __pycache__/
 *.pyc
+
+# Local-only tools (not for public repo)
+scripts/
+tests/
