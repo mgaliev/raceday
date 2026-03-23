@@ -19,8 +19,19 @@ class TestLoadConfig(unittest.TestCase):
             os.unlink(path)
 
     def test_missing_file_raises(self):
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(SystemExit) as cm:
             load_config('/nonexistent/secrets.local')
+        self.assertEqual(cm.exception.code, 1)
+
+    def test_value_with_equals_sign(self):
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.local', delete=False) as f:
+            f.write("TOKEN=abc=def==\n")
+            path = f.name
+        try:
+            cfg = load_config(path)
+            self.assertEqual(cfg['TOKEN'], 'abc=def==')
+        finally:
+            os.unlink(path)
 
     def test_ignores_comments_and_blanks(self):
         with tempfile.NamedTemporaryFile(mode='w', suffix='.local', delete=False) as f:
