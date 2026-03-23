@@ -40,5 +40,20 @@ def load_config(path=None):
     return cfg
 
 
+def validate_date(iso_str):
+    """Convert ISO date string '2026-06-15' to Russian genitive '15 июня'.
+    Returns None for empty input. Raises ValueError for invalid format or impossible date.
+    """
+    if not iso_str:
+        return None
+    try:
+        d = datetime.date.fromisoformat(iso_str)
+    except ValueError:
+        raise ValueError(
+            f"Неверная дата: '{iso_str}'. Ожидается ГГГГ-ММ-ДД, например 2026-06-15"
+        )
+    return f"{d.day} {MONTHS_GENITIVE[d.month]}"
+
+
 if __name__ == '__main__':
     pass

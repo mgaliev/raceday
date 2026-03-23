@@ -44,5 +44,31 @@ class TestLoadConfig(unittest.TestCase):
         finally:
             os.unlink(path)
 
+from race import validate_date
+
+class TestValidateDate(unittest.TestCase):
+    def test_valid_iso_converts_to_russian(self):
+        self.assertEqual(validate_date('2026-06-15'), '15 июня')
+        self.assertEqual(validate_date('2026-01-01'), '1 января')
+        self.assertEqual(validate_date('2026-12-31'), '31 декабря')
+
+    def test_empty_returns_none(self):
+        self.assertIsNone(validate_date(''))
+        self.assertIsNone(validate_date(None))
+
+    def test_invalid_format_raises(self):
+        with self.assertRaises(ValueError):
+            validate_date('15-06-2026')
+        with self.assertRaises(ValueError):
+            validate_date('2026/06/15')
+        with self.assertRaises(ValueError):
+            validate_date('not-a-date')
+
+    def test_logically_invalid_date_raises(self):
+        with self.assertRaises(ValueError):
+            validate_date('2026-02-31')  # Feb 31 doesn't exist
+        with self.assertRaises(ValueError):
+            validate_date('2026-13-01')  # month 13
+
 if __name__ == '__main__':
     unittest.main()
