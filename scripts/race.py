@@ -67,6 +67,91 @@ def validate_url(url_str):
     return url_str
 
 
+def fuzzy_match(name, records, name_field):
+    """Match name against records. Returns:
+    - record_id (str) for exact or single substring match
+    - list of matching records when multiple substring matches
+    - None when no match
+    """
+    needle = name.strip().lower()
+    # Exact match first
+    for r in records:
+        if r['fields'].get(name_field, '').strip().lower() == needle:
+            return r['id']
+    # Substring match
+    matches = [r for r in records if needle in r['fields'].get(name_field, '').lower()]
+    if len(matches) == 1:
+        return matches[0]['id']
+    if len(matches) > 1:
+        return matches  # caller handles multi-match prompt
+    return None
+
+
+class Cache:
+    """Holds discipline and location records fetched at startup."""
+
+    def __init__(self, client):
+        print("Загружаю справочники...", end=' ', flush=True)
+        self.disciplines = client.fetch_all('Disciplines')
+        self.locations = client.fetch_all('Locations')
+        self.races = client.fetch_all('Races')
+        # Normalize: some locations use City, others use Location Name — unify into Location Name
+        for r in self.locations:
+            if not r['fields'].get('Location Name') and r['fields'].get('City'):
+                r['fields']['Location Name'] = r['fields']['City']
+        print("готово.")
+
+    def resolve_discipline(self, name, client):
+        """Resolve discipline name to record ID. Returns (id, was_created)."""
+        return _resolve_linked(name, self.disciplines, 'Discipline Name',
+                               'Дисциплина', 'Disciplines', client, self.disciplines)
+
+    def resolve_location(self, name, client):
+        """Resolve location name to record ID. Returns (id, was_created)."""
+        return _resolve_linked(name, self.locations, 'Location Name',
+                               'Локация', 'Locations', client, self.locations)
+
+    def find_race_by_name(self, name):
+        """Find existing race by case-insensitive exact name match."""
+        needle = name.strip().lower()
+        for r in self.races:
+            if r['fields'].get('Race Name', '').strip().lower() == needle:
+                return r
+        return None
+
+
+def _resolve_linked(name, records, name_field, label, table, client, cache_list):
+    """Resolve a name to an Airtable record ID with interactive prompts.
+    Returns (record_id, was_created) tuple.
+    """
+    result = fuzzy_match(name, records, name_field)
+    if isinstance(result, str):
+        return result, False  # single match, not created
+    if isinstance(result, list):
+        # Multiple matches — prompt user to choose
+        print(f"\nНайдено несколько совпадений для '{name}':")
+        for i, r in enumerate(result, 1):
+            print(f"  {i}. {r['fields'].get(name_field, r['id'])}")
+        print("  0. Создать новую запись")
+        while True:
+            choice = input("Выберите номер: ").strip()
+            if choice == '0':
+                break
+            if choice.isdigit() and 1 <= int(choice) <= len(result):
+                return result[int(choice) - 1]['id'], False
+            print("Неверный ввод, попробуйте снова.")
+        # Fall through to create new
+    # No match — ask to create
+    answer = input(f"{label} '{name}' не найдена. Создать? [y/n]: ").strip().lower()
+    if answer != 'y':
+        return None, False
+    created = client.post(table, {name_field: name})
+    new_record = {'id': created['id'], 'fields': {name_field: name}}
+    cache_list.append(new_record)
+    print(f"Создана {label.lower()}: '{name}' ({created['id']})")
+    return created['id'], True
+
+
 class AirtableClient:
     BASE_URL = 'https://api.airtable.com/v0'
 

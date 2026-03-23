@@ -92,5 +92,37 @@ class TestValidateUrl(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_url('example.com')
 
+from race import fuzzy_match
+
+class TestFuzzyMatch(unittest.TestCase):
+    def setUp(self):
+        self.records = [
+            {'id': 'rec1', 'fields': {'Discipline Name': 'Гревел'}},
+            {'id': 'rec2', 'fields': {'Discipline Name': 'MTB XCM'}},
+            {'id': 'rec3', 'fields': {'Discipline Name': 'MTB XCO'}},
+            {'id': 'rec4', 'fields': {'Discipline Name': 'Шоссе'}},
+        ]
+
+    def test_exact_match(self):
+        result = fuzzy_match('Гревел', self.records, 'Discipline Name')
+        self.assertEqual(result, 'rec1')
+
+    def test_exact_match_case_insensitive(self):
+        result = fuzzy_match('гревел', self.records, 'Discipline Name')
+        self.assertEqual(result, 'rec1')
+
+    def test_single_substring_match_auto_select(self):
+        result = fuzzy_match('Шоссе', self.records, 'Discipline Name')
+        self.assertEqual(result, 'rec4')
+
+    def test_no_match_returns_none(self):
+        result = fuzzy_match('Триатлон', self.records, 'Discipline Name')
+        self.assertIsNone(result)
+
+    def test_multiple_substring_matches_returns_list(self):
+        result = fuzzy_match('MTB', self.records, 'Discipline Name')
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 2)
+
 if __name__ == '__main__':
     unittest.main()
