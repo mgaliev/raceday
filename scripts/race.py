@@ -67,5 +67,73 @@ def validate_url(url_str):
     return url_str
 
 
+class AirtableClient:
+    """Minimal Airtable REST client using urllib."""
+
+    BASE_URL = 'https://api.airtable.com/v0'
+
+    def __init__(self, token, base_id):
+        self.token = token
+        self.base_id = base_id
+        self.headers = {
+            'Authorization': f'Bearer {token}',
+            'Content-Type': 'application/json',
+        }
+
+    def _request(self, method, path, data=None):
+        url = f'{self.BASE_URL}/{self.base_id}/{urllib.parse.quote(path, safe="")}'
+        body = json.dumps(data).encode() if data else None
+        req = urllib.request.Request(url, data=body, headers=self.headers, method=method)
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            body = e.read().decode()
+            print(f"Airtable API ошибка {e.code}: {body}")
+            sys.exit(1)
+        except urllib.error.URLError as e:
+            print(f"Сетевая ошибка: {e.reason}")
+            sys.exit(1)
+
+    def fetch_all(self, table):
+        """Fetch all records from a table (handles pagination)."""
+        records = []
+        offset = None
+        while True:
+            params = {'pageSize': '100'}
+            if offset:
+                params['offset'] = offset
+            url = (f'{self.BASE_URL}/{self.base_id}/{urllib.parse.quote(table, safe="")}'
+                   f'?{urllib.parse.urlencode(params)}')
+            req = urllib.request.Request(url, headers=self.headers)
+            try:
+                with urllib.request.urlopen(req) as resp:
+                    data = json.loads(resp.read())
+            except urllib.error.HTTPError as e:
+                print(f"Airtable API ошибка {e.code}: {e.read().decode()}")
+                sys.exit(1)
+            records.extend(data.get('records', []))
+            offset = data.get('offset')
+            if not offset:
+                break
+        return records
+
+    def post(self, table, fields):
+        """Create a new record. Returns the created record."""
+        return self._request('POST', table, {'fields': fields})
+
+    def patch(self, table, record_id, fields):
+        """Update fields of an existing record. Returns updated record."""
+        url = f'{self.BASE_URL}/{self.base_id}/{urllib.parse.quote(table, safe="")}/{record_id}'
+        data = json.dumps({'fields': fields}).encode()
+        req = urllib.request.Request(url, data=data, headers=self.headers, method='PATCH')
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return json.loads(resp.read())
+        except urllib.error.HTTPError as e:
+            print(f"Airtable API ошибка {e.code}: {e.read().decode()}")
+            sys.exit(1)
+
+
 if __name__ == '__main__':
     pass
