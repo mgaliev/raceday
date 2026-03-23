@@ -219,6 +219,95 @@ class TestCmdAdd(unittest.TestCase):
         self.assertNotIn('Discipline', fields)
         self.assertNotIn('Location', fields)
 
+from race import cmd_import
+import tempfile
+
+class TestCmdImport(unittest.TestCase):
+    def _write_csv(self, content):
+        f = tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, encoding='utf-8')
+        f.write(content)
+        f.close()
+        return f.name
+
+    def test_imports_new_races(self):
+        csv_content = "name,date,discipline,location,link\nTest Race,2026-07-01,Гревел,Москва,https://example.ru\n"
+        path = self._write_csv(csv_content)
+
+        client = MagicMock()
+        client.post.return_value = {'id': 'recNEW', 'fields': {'Race Name': 'Test Race'}}
+        cache = MagicMock()
+        cache.find_race_by_name.return_value = None
+        cache.resolve_discipline.return_value = ('recD1', False)
+        cache.resolve_location.return_value = ('recL1', False)
+
+        args = MagicMock()
+        args.file = path
+        with patch('builtins.print'):
+            cmd_import(args, client, cache)
+
+        client.post.assert_called_once()
+        os.unlink(path)
+
+    def test_skips_invalid_date(self):
+        csv_content = "name,date,discipline,location,link\nBad Race,not-a-date,Гревел,Москва,\n"
+        path = self._write_csv(csv_content)
+
+        client = MagicMock()
+        cache = MagicMock()
+        cache.find_race_by_name.return_value = None
+
+        args = MagicMock()
+        args.file = path
+        with patch('builtins.print'):
+            cmd_import(args, client, cache)
+
+        client.post.assert_not_called()
+        os.unlink(path)
+
+    def test_prints_summary(self):
+        csv_content = "name,date,discipline,location,link\nRace A,,Гревел,Москва,\nRace B,,Гревел,Москва,\n"
+        path = self._write_csv(csv_content)
+
+        client = MagicMock()
+        client.post.return_value = {'id': 'recX', 'fields': {}}
+        cache = MagicMock()
+        cache.find_race_by_name.return_value = None
+        cache.resolve_discipline.return_value = ('recD1', False)
+        cache.resolve_location.return_value = ('recL1', False)
+
+        args = MagicMock()
+        args.file = path
+        printed = []
+        with patch('builtins.print', side_effect=lambda *a: printed.append(' '.join(str(x) for x in a))):
+            cmd_import(args, client, cache)
+
+        summary = ' '.join(printed)
+        self.assertIn('добавлено', summary)
+        self.assertIn('2', summary)
+        os.unlink(path)
+
+    def test_created_new_counter(self):
+        csv_content = "name,date,discipline,location,link\nNew Race,,Гревел,НовыйГород,\n"
+        path = self._write_csv(csv_content)
+
+        client = MagicMock()
+        client.post.return_value = {'id': 'recX', 'fields': {}}
+        cache = MagicMock()
+        cache.find_race_by_name.return_value = None
+        cache.resolve_discipline.return_value = ('recD1', False)
+        cache.resolve_location.return_value = ('recL1', True)  # location was created
+
+        args = MagicMock()
+        args.file = path
+        printed = []
+        with patch('builtins.print', side_effect=lambda *a: printed.append(' '.join(str(x) for x in a))):
+            cmd_import(args, client, cache)
+
+        summary = ' '.join(printed)
+        self.assertIn('создано новых справочников 1', summary)
+        os.unlink(path)
+
+
 from race import cmd_update
 
 class TestCmdUpdate(unittest.TestCase):

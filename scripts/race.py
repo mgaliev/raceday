@@ -228,6 +228,63 @@ def cmd_update(args, client):
     print(f'Обновлено: ({result["id"]})')
 
 
+def cmd_import(args, client, cache):
+    """Handle 'import' subcommand — bulk load races from CSV."""
+    added = updated = skipped = created_new = 0
+
+    with open(args.file, newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        for row_num, row in enumerate(reader, start=2):
+            name = row.get('name', '').strip()
+            if not name:
+                print(f"Строка {row_num}: пустое имя, пропуск.")
+                skipped += 1
+                continue
+
+            # Validate date and link
+            try:
+                date_str = validate_date(row.get('date', '').strip() or None)
+                link_str = validate_url(row.get('link', '').strip() or None)
+            except ValueError as e:
+                print(f"Строка {row_num} ({name}): {e} — пропуск.")
+                skipped += 1
+                continue
+
+            # Check duplicate
+            existing = cache.find_race_by_name(name)
+            if existing:
+                answer = input(f'"{name}" уже существует. [u]pdate / [s]kip: ').strip().lower()
+                if answer == 'u':
+                    fields = _build_fields(name, date_str, link_str, None, None)
+                    client.patch('Races', existing['id'], fields)
+                    updated += 1
+                    print(f'  Обновлено: "{name}"')
+                else:
+                    skipped += 1
+                    print(f'  Пропущено: "{name}"')
+                continue
+
+            # Resolve discipline and location
+            disc_id, disc_new = cache.resolve_discipline(row.get('discipline', '').strip(), client)
+            if disc_id is None:
+                skipped += 1
+                continue
+            loc_id, loc_new = cache.resolve_location(row.get('location', '').strip(), client)
+            if loc_id is None:
+                skipped += 1
+                continue
+
+            created_new += int(disc_new) + int(loc_new)
+            fields = _build_fields(name, date_str, link_str, disc_id, loc_id)
+            result = client.post('Races', fields)
+            cache.races.append(result)
+            added += 1
+            print(f'  Добавлено: "{name}" ({result["id"]})')
+
+    print(f"\nИмпорт завершён: добавлено {added}, обновлено {updated}, "
+          f"пропущено {skipped}, создано новых справочников {created_new}")
+
+
 class AirtableClient:
     BASE_URL = 'https://api.airtable.com/v0'
 
