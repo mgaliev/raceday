@@ -70,5 +70,27 @@ class TestValidateDate(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_date('2026-13-01')  # month 13
 
+from race import validate_url
+
+class TestValidateUrl(unittest.TestCase):
+    def test_valid_https(self):
+        self.assertTrue(validate_url('https://example.ru'))
+        self.assertTrue(validate_url('https://reg.place/events/race-2026'))
+
+    def test_valid_http(self):
+        self.assertTrue(validate_url('http://vk.com/race'))
+
+    def test_empty_returns_none(self):
+        self.assertIsNone(validate_url(''))
+        self.assertIsNone(validate_url(None))
+
+    def test_invalid_raises(self):
+        with self.assertRaises(ValueError):
+            validate_url('not-a-url')
+        with self.assertRaises(ValueError):
+            validate_url('ftp://example.com')
+        with self.assertRaises(ValueError):
+            validate_url('example.com')
+
 if __name__ == '__main__':
     unittest.main()

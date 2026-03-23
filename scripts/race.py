@@ -55,5 +55,17 @@ def validate_date(iso_str):
     return f"{d.day} {MONTHS_GENITIVE[d.month]}"
 
 
+def validate_url(url_str):
+    """Validate URL (http/https). Returns None for empty. Raises ValueError for invalid."""
+    if not url_str:
+        return None
+    parsed = urllib.parse.urlparse(url_str)
+    if parsed.scheme not in ('http', 'https') or not parsed.netloc:
+        raise ValueError(
+            f"Неверный URL: '{url_str}'. Ожидается https://... или http://..."
+        )
+    return url_str
+
+
 if __name__ == '__main__':
     pass
