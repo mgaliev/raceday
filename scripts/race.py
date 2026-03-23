@@ -181,6 +181,7 @@ def cmd_add(args, client, cache):
         rec_id = existing['id']
         answer = input(f'"{args.name}" уже существует ({rec_id}). [u]pdate / [s]kip: ').strip().lower()
         if answer == 'u':
+            # Only name/date/link updated on duplicate — discipline/location via Airtable UI
             fields = _build_fields(args.name, date_str, link_str, None, None)
             client.patch('Races', rec_id, fields)
             print(f'Обновлено: "{args.name}" ({rec_id})')

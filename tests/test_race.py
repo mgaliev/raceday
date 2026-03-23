@@ -170,7 +170,8 @@ class TestCmdAdd(unittest.TestCase):
         args.location = 'Москва'
         args.link = None
 
-        cmd_add(args, client, cache)
+        with patch('builtins.print'):
+            cmd_add(args, client, cache)
 
         fields = client.post.call_args[0][1]
         self.assertNotIn('Date', fields)
@@ -207,11 +208,16 @@ class TestCmdAdd(unittest.TestCase):
         args.location = 'Москва'
         args.link = None
 
-        with patch('builtins.input', return_value='u'):
+        with patch('builtins.input', return_value='u'), patch('builtins.print'):
             cmd_add(args, client, cache)
 
         client.patch.assert_called_once()
         self.assertEqual(client.patch.call_args[0][1], 'recEXIST')
+        fields = client.patch.call_args[0][2]
+        self.assertEqual(fields['Race Name'], 'Existing Race')
+        self.assertEqual(fields['Date'], '1 августа')
+        self.assertNotIn('Discipline', fields)
+        self.assertNotIn('Location', fields)
 
 if __name__ == '__main__':
     unittest.main()
