@@ -219,5 +219,57 @@ class TestCmdAdd(unittest.TestCase):
         self.assertNotIn('Discipline', fields)
         self.assertNotIn('Location', fields)
 
+from race import cmd_update
+
+class TestCmdUpdate(unittest.TestCase):
+    def test_updates_allowed_fields(self):
+        client = MagicMock()
+        client.patch.return_value = {'id': 'recABC', 'fields': {}}
+
+        args = MagicMock()
+        args.record_id = 'recABC'
+        args.name = 'New Name'
+        args.date = '2026-09-01'
+        args.link = 'https://new-link.ru'
+
+        with patch('builtins.print'):
+            cmd_update(args, client)
+
+        client.patch.assert_called_once()
+        fields = client.patch.call_args[0][2]
+        self.assertEqual(fields['Race Name'], 'New Name')
+        self.assertEqual(fields['Date'], '1 сентября')
+        self.assertEqual(fields['Registration Link'], 'https://new-link.ru')
+
+    def test_only_provided_fields_sent(self):
+        client = MagicMock()
+        client.patch.return_value = {'id': 'recABC', 'fields': {}}
+
+        args = MagicMock()
+        args.record_id = 'recABC'
+        args.name = None
+        args.date = None
+        args.link = 'https://link.ru'
+
+        with patch('builtins.print'):
+            cmd_update(args, client)
+
+        fields = client.patch.call_args[0][2]
+        self.assertNotIn('Race Name', fields)
+        self.assertNotIn('Date', fields)
+        self.assertIn('Registration Link', fields)
+
+    def test_no_fields_exits(self):
+        client = MagicMock()
+        args = MagicMock()
+        args.record_id = 'recABC'
+        args.name = None
+        args.date = None
+        args.link = None
+
+        with self.assertRaises(SystemExit):
+            cmd_update(args, client)
+
+
 if __name__ == '__main__':
     unittest.main()

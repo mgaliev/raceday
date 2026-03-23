@@ -205,6 +205,29 @@ def cmd_add(args, client, cache):
     cache.races.append(result)
 
 
+def cmd_update(args, client):
+    """Handle 'update' subcommand. Supports --name, --date, --link only."""
+    fields = {}
+    try:
+        if getattr(args, 'name', None):
+            fields['Race Name'] = args.name
+        if getattr(args, 'date', None):
+            fields['Date'] = validate_date(args.date)
+        if getattr(args, 'link', None):
+            validate_url(args.link)
+            fields['Registration Link'] = args.link
+    except ValueError as e:
+        print(f"Ошибка: {e}")
+        sys.exit(1)
+
+    if not fields:
+        print("Нет полей для обновления. Укажите --name, --date или --link.")
+        sys.exit(1)
+
+    result = client.patch('Races', args.record_id, fields)
+    print(f'Обновлено: ({result["id"]})')
+
+
 class AirtableClient:
     BASE_URL = 'https://api.airtable.com/v0'
 
