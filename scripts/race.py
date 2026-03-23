@@ -152,6 +152,58 @@ def _resolve_linked(name, records, name_field, label, table, client, cache_list)
     return created['id'], True
 
 
+def _build_fields(name, date_str, link_str, disc_id, loc_id):
+    """Build Airtable fields dict, omitting None/empty values."""
+    fields = {'Race Name': name}
+    if date_str:
+        fields['Date'] = date_str
+    if link_str:
+        fields['Registration Link'] = link_str
+    if disc_id:
+        fields['Discipline'] = [disc_id]
+    if loc_id:
+        fields['Location'] = [loc_id]
+    return fields
+
+
+def cmd_add(args, client, cache):
+    """Handle 'add' subcommand."""
+    try:
+        date_str = validate_date(args.date)
+        link_str = validate_url(getattr(args, 'link', None))
+    except ValueError as e:
+        print(f"Ошибка: {e}")
+        sys.exit(1)
+
+    # Check for duplicate
+    existing = cache.find_race_by_name(args.name)
+    if existing:
+        rec_id = existing['id']
+        answer = input(f'"{args.name}" уже существует ({rec_id}). [u]pdate / [s]kip: ').strip().lower()
+        if answer == 'u':
+            fields = _build_fields(args.name, date_str, link_str, None, None)
+            client.patch('Races', rec_id, fields)
+            print(f'Обновлено: "{args.name}" ({rec_id})')
+        else:
+            print('Пропущено.')
+        return
+
+    # Resolve discipline and location
+    disc_id, _ = cache.resolve_discipline(args.discipline, client)
+    if disc_id is None:
+        print('Пропущено (дисциплина не выбрана).')
+        return
+    loc_id, _ = cache.resolve_location(args.location, client)
+    if loc_id is None:
+        print('Пропущено (локация не выбрана).')
+        return
+
+    fields = _build_fields(args.name, date_str, link_str, disc_id, loc_id)
+    result = client.post('Races', fields)
+    print(f'Создано: "{args.name}" ({result["id"]})')
+    cache.races.append(result)
+
+
 class AirtableClient:
     BASE_URL = 'https://api.airtable.com/v0'
 

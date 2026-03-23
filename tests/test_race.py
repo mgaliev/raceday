@@ -124,5 +124,94 @@ class TestFuzzyMatch(unittest.TestCase):
         self.assertIsInstance(result, list)
         self.assertEqual(len(result), 2)
 
+from unittest.mock import MagicMock, patch
+from race import cmd_add
+
+class TestCmdAdd(unittest.TestCase):
+    def _make_cache(self, existing_race=None):
+        cache = MagicMock()
+        cache.find_race_by_name.return_value = existing_race
+        cache.resolve_discipline.return_value = ('recDISC1', False)
+        cache.resolve_location.return_value = ('recLOC1', False)
+        return cache
+
+    def test_creates_new_race(self):
+        client = MagicMock()
+        client.post.return_value = {'id': 'recNEW1', 'fields': {'Race Name': 'Test Race'}}
+        cache = self._make_cache(existing_race=None)
+
+        args = MagicMock()
+        args.name = 'Test Race'
+        args.date = '2026-06-15'
+        args.discipline = 'Гревел'
+        args.location = 'Москва'
+        args.link = 'https://example.ru'
+
+        with patch('builtins.print'):
+            cmd_add(args, client, cache)
+
+        client.post.assert_called_once()
+        call_fields = client.post.call_args[0][1]
+        self.assertEqual(call_fields['Race Name'], 'Test Race')
+        self.assertEqual(call_fields['Date'], '15 июня')
+        self.assertEqual(call_fields['Registration Link'], 'https://example.ru')
+        self.assertEqual(call_fields['Discipline'], ['recDISC1'])
+        self.assertEqual(call_fields['Location'], ['recLOC1'])
+
+    def test_tbd_date_not_sent(self):
+        client = MagicMock()
+        client.post.return_value = {'id': 'recNEW2', 'fields': {}}
+        cache = self._make_cache()
+
+        args = MagicMock()
+        args.name = 'TBD Race'
+        args.date = None
+        args.discipline = 'Гревел'
+        args.location = 'Москва'
+        args.link = None
+
+        cmd_add(args, client, cache)
+
+        fields = client.post.call_args[0][1]
+        self.assertNotIn('Date', fields)
+        self.assertNotIn('Registration Link', fields)
+
+    def test_duplicate_skip(self):
+        client = MagicMock()
+        existing = {'id': 'recEXIST', 'fields': {'Race Name': 'Existing Race'}}
+        cache = self._make_cache(existing_race=existing)
+
+        args = MagicMock()
+        args.name = 'Existing Race'
+        args.date = None
+        args.discipline = 'Гревел'
+        args.location = 'Москва'
+        args.link = None
+
+        with patch('builtins.input', return_value='s'):
+            cmd_add(args, client, cache)
+
+        client.post.assert_not_called()
+        client.patch.assert_not_called()
+
+    def test_duplicate_update(self):
+        client = MagicMock()
+        client.patch.return_value = {'id': 'recEXIST', 'fields': {}}
+        existing = {'id': 'recEXIST', 'fields': {'Race Name': 'Existing Race'}}
+        cache = self._make_cache(existing_race=existing)
+
+        args = MagicMock()
+        args.name = 'Existing Race'
+        args.date = '2026-08-01'
+        args.discipline = 'Гревел'
+        args.location = 'Москва'
+        args.link = None
+
+        with patch('builtins.input', return_value='u'):
+            cmd_add(args, client, cache)
+
+        client.patch.assert_called_once()
+        self.assertEqual(client.patch.call_args[0][1], 'recEXIST')
+
 if __name__ == '__main__':
     unittest.main()
