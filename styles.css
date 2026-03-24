@@ -418,3 +418,160 @@ body {
 .footer a:hover {
   color: var(--text-2);
 }
+
+/* ── Save button ─────────────────────────── */
+
+.race-save-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: var(--text-3);
+  flex-shrink: 0;
+  line-height: 1;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+
+.race-save-btn:hover { color: var(--text-2); }
+
+.race-save-btn.saved { color: var(--accent); }
+
+.race-save-btn svg {
+  display: block;
+  fill: none;
+  transition: fill 0.15s;
+}
+
+.race-save-btn.saved svg { fill: currentColor; }
+
+/* ── Shared season banner ────────────────── */
+
+.season-banner {
+  background: #fffbe6;
+  border-bottom: 1px solid #ffe58f;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text);
+  line-height: 1.8;
+}
+
+.season-banner-actions {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: 10px;
+  align-items: center;
+}
+
+.season-banner-btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1.5px solid var(--accent);
+  background: none;
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.season-banner-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.season-banner-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-3);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 4px;
+  font-family: inherit;
+  transition: color 0.15s;
+}
+
+.season-banner-close:hover { color: var(--text); }
+
+/* ── Share button ────────────────────────── */
+
+.share-wrap {
+  text-align: center;
+  padding: 24px 0 8px;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.share-btn:hover { background: #003DB3; }
+
+.share-btn.copied { background: #2e7d32; }
+
+/* ── saved.html hero ─────────────────────── */
+
+.saved-hero {
+  padding: 36px 0 20px;
+}
+
+.saved-hero h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.saved-hero p {
+  color: var(--text-2);
+  font-size: 0.9375rem;
+}
+
+/* ── Empty state (saved page) ────────────── */
+
+.saved-empty {
+  text-align: center;
+  padding: 64px 20px;
+  color: var(--text-3);
+}
+
+.saved-empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.saved-empty h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 20px;
+}
+
+.saved-empty-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.saved-empty-cta:hover { background: #003DB3; }
