@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript">
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();
+    for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+    k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=107730862', 'ym');
+    ym(107730862, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+  </script>
+  <noscript><div><img src="https://mc.yandex.ru/watch/107730862" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+  <!-- /Yandex.Metrika counter -->
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мой сезон — RaceDay</title>
+  <meta name="description" content="Мои сохранённые велогонки на 2026 год — персональный календарь стартов.">
+  <meta property="og:title" content="Мой сезон — RaceDay">
+  <meta property="og:description" content="Персональный календарь любительских велогонок России 2026.">
+  <meta property="og:url" content="https://raceday-russia.ru/saved.html">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Shared season banner (hidden by default, shown in shared mode) -->
+  <div class="season-banner" id="seasonBanner" style="display:none">
+    <span>Это чужой сезон — хочешь добавить все эти гонки в свой?</span>
+    <span class="season-banner-actions">
+      <button class="season-banner-btn" onclick="addAllToSeason()">Добавить все</button>
+      <button class="season-banner-close" onclick="dismissBanner()" aria-label="Закрыть">✕</button>
+    </span>
+  </div>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" style="text-decoration:none">RaceDay</a>
+      <nav class="header-nav">
+        <a href="index.html" class="header-link">Все старты</a>
+        <a href="mailto:r4ceday@yandex.com" class="header-link header-email">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <polyline points="2,4 12,13 22,4"/>
+          </svg>
+          <span class="header-email-text">r4ceday@yandex.com</span>
+        </a>
+        <a href="saved.html" class="header-link" id="seasonLink">Мой сезон</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="saved-hero">
+    <div class="container">
+      <h1>Мой сезон</h1>
+      <p id="savedSubtitle">Загрузка…</p>
+    </div>
+  </section>
+
+  <main class="calendar" id="calendar">
+    <div class="container">
+      <div id="savedContent">
+        <!-- skeleton while loading -->
+        <div class="skeleton-wrap">
+          <div class="skeleton-month"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+      <!-- share button (own mode, hidden until ready) -->
+      <div class="share-wrap" id="shareWrap" style="display:none">
+        <button class="share-btn" id="shareBtn" onclick="shareMyseason()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          Поделиться сезоном
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Данные обновляются вручную. Перед регистрацией проверяйте актуальность на сайте организатора.</p>
+      <p>© 2026 RaceDay</p>
+    </div>
+  </footer>
+
+  <script>
+    const AIRTABLE_TOKEN = 'patAljGLbreWlHUVA.f5816ce1d7b4e0de450f040b88df2e16a817fe82e966555006c02115f8256ffd';
+    const AIRTABLE_BASE  = 'app2Ho3VmHJhOW63x';
+
+    // ── localStorage helpers ─────────────────────────────────
+    function getSaved() {
+      try { return JSON.parse(localStorage.getItem('savedRaces') || '[]'); }
+      catch { return []; }
+    }
+    function isSaved(id) { return getSaved().includes(id); }
+    function toggleSaved(id) {
+      let saved = getSaved();
+      if (saved.includes(id)) {
+        saved = saved.filter(x => x !== id);
+      } else {
+        saved.push(id);
+      }
+      try { localStorage.setItem('savedRaces', JSON.stringify(saved)); } catch {}
+      const card = document.querySelector(`.race-card[data-race-id="${id}"]`);
+      if (card) {
+        const btn = card.querySelector('.race-save-btn');
+        if (btn) {
+          const nowSaved = saved.includes(id);
+          btn.classList.toggle('saved', nowSaved);
+          btn.setAttribute('aria-label', nowSaved ? 'Убрать из сохранённых' : 'Сохранить');
+          // In own mode: remove card from DOM on unsave
+          if (currentMode === 'own' && !nowSaved) {
+            card.closest('.race-list') && card.remove();
+            checkEmptyAfterRemoval();
+          }
+        }
+      }
+      updateSeasonCount();
+    }
+    function updateSeasonCount() {
+      const count = getSaved().length;
+      const link = document.getElementById('seasonLink');
+      if (link) link.textContent = count > 0 ? `Мой сезон (${count})` : 'Мой сезон';
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Airtable fetch ───────────────────────────────────────
+    async function fetchAll(tableName) {
+      const base = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(tableName)}`;
+      const headers = { Authorization: `Bearer ${AIRTABLE_TOKEN}` };
+      let records = [], offset = null;
+      do {
+        const params = new URLSearchParams({ pageSize: '100' });
+        if (offset) params.set('offset', offset);
+        const res = await fetch(`${base}?${params}`, { headers });
+        if (!res.ok) throw new Error(`${tableName}: ${res.status}`);
+        const data = await res.json();
+        records = records.concat(data.records);
+        offset = data.offset || null;
+      } while (offset);
+      return records;
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Lookup maps ──────────────────────────────────────────
+    let disciplineMap = {};
+    let locationMap   = {};
+    let allRaces      = [];
+
+    function resolveDiscipline(ids) {
+      if (!ids || !ids.length) return '';
+      return ids.map(id => disciplineMap[id] || id).join(', ');
+    }
+    function resolveLocation(ids) {
+      if (!ids || !ids.length) return '';
+      return ids.map(id => locationMap[id] || id).join(', ');
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Badge styles ─────────────────────────────────────────
+    const DISCIPLINE_COLORS = [
+      { key: 'гревел',      bg: '#e8f5e9', color: '#2e7d32' },
+      { key: 'mtb',         bg: '#fff3e0', color: '#e65100' },
+      { key: 'гран фондо',  bg: '#e3f2fd', color: '#1565c0' },
+      { key: 'шоссе',       bg: '#e3f2fd', color: '#1565c0' },
+      { key: 'велокросс',   bg: '#f3e5f5', color: '#6a1b9a' },
+      { key: 'многодневка', bg: '#fce4ec', color: '#c62828' },
+      { key: 'байкпакинг',  bg: '#e0f7fa', color: '#00695c' },
+      { key: 'бревет',      bg: '#f1f8e9', color: '#558b2f' },
+    ];
+    function badgeStyle(discipline) {
+      if (!discipline) return 'background:#f5f5f5;color:#666';
+      const d = discipline.toLowerCase();
+      for (const { key, bg, color } of DISCIPLINE_COLORS) {
+        if (d.includes(key)) return `background:${bg};color:${color}`;
+      }
+      return 'background:#f5f5f5;color:#666';
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Render card ──────────────────────────────────────────
+    function renderCard(r) {
+      const f = r.fields;
+      const discipline = resolveDiscipline(f['Discipline']);
+      const location   = resolveLocation(f['Location']);
+      const link = f['Registration Link'];
+      const hasLink = link && link !== '-' && link !== '';
+      const saved = isSaved(r.id);
+      return `
+        <div class="race-card" data-race-id="${r.id}">
+          <div class="race-card-main">
+            <div class="race-name">${f['Race Name'] || '—'}</div>
+            <div class="race-meta">
+              <span class="race-badge" style="${badgeStyle(discipline)}">${discipline}</span>
+              <span class="race-date">${f['Date'] || ''}</span>
+              <span class="race-place">${location}</span>
+            </div>
+          </div>
+          ${hasLink
+            ? `<a class="race-link" href="${link}" target="_blank" rel="noopener">Регистрация →</a>`
+            : `<span class="race-link-empty">Скоро</span>`}
+          <button class="race-save-btn${saved ? ' saved' : ''}"
+                  onclick="toggleSaved('${r.id}')"
+                  aria-label="${saved ? 'Убрать из сохранённых' : 'Сохранить'}">
+            <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+        </div>`;
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Date helpers (for sort) ──────────────────────────────
+    const MONTHS_ORDER = [
+      'январь','февраль','март','апрель','май','июнь',
+      'июль','август','сентябрь','октябрь','ноябрь','декабрь'
+    ];
+    const MONTH_STEMS = [
+      ['январ','январь'], ['феврал','февраль'], ['март','март'],
+      ['апрел','апрель'], ['мая','май'],         ['июн','июнь'],
+      ['июл','июль'],     ['август','август'],   ['сентябр','сентябрь'],
+      ['октябр','октябрь'],['ноябр','ноябрь'],  ['декабр','декабрь'],
+    ];
+    const MONTHS_DISPLAY = {
+      'январь':'Январь','февраль':'Февраль','март':'Март',
+      'апрель':'Апрель','май':'Май','июнь':'Июнь',
+      'июль':'Июль','август':'Август','сентябрь':'Сентябрь',
+      'октябрь':'Октябрь','ноябрь':'Ноябрь','декабрь':'Декабрь',
+      'без даты':'Дата уточняется'
+    };
+    function getMonth(dateStr) {
+      if (!dateStr) return 'без даты';
+      const s = dateStr.toLowerCase();
+      for (const [stem, canonical] of MONTH_STEMS) {
+        if (s.includes(stem)) return canonical;
+      }
+      return 'без даты';
+    }
+    function monthIdx(m) {
+      const i = MONTHS_ORDER.indexOf(m);
+      return i === -1 ? 999 : i;
+    }
+    function getDay(dateStr) {
+      if (!dateStr) return 999;
+      const m = dateStr.match(/(\d+)/);
+      return m ? parseInt(m[1], 10) : 999;
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Render race list ─────────────────────────────────────
+    function renderRaces(races) {
+      const content = document.getElementById('savedContent');
+      if (races.length === 0) {
+        showEmpty();
+        return;
+      }
+      const byMonth = {};
+      for (const r of races) {
+        const m = getMonth(r.fields['Date']);
+        if (!byMonth[m]) byMonth[m] = [];
+        byMonth[m].push(r);
+      }
+      const sortedMonths = Object.keys(byMonth).sort((a, b) => monthIdx(a) - monthIdx(b));
+      content.innerHTML = sortedMonths.map(m => `
+        <div class="month-group">
+          <div class="month-header">${MONTHS_DISPLAY[m] || m}</div>
+          <div class="race-list">${byMonth[m]
+            .slice()
+            .sort((a, b) => getDay(a.fields['Date']) - getDay(b.fields['Date']))
+            .map(r => renderCard(r)).join('')}</div>
+        </div>`
+      ).join('');
+    }
+
+    function showEmpty() {
+      document.getElementById('savedContent').innerHTML = `
+        <div class="saved-empty">
+          <div class="saved-empty-icon">🚴</div>
+          <h2>У тебя пока нет сохранённых гонок</h2>
+          <a href="index.html" class="saved-empty-cta">Смотреть календарь →</a>
+        </div>`;
+      document.getElementById('shareWrap').style.display = 'none';
+    }
+
+    function checkEmptyAfterRemoval() {
+      const remaining = document.querySelectorAll('.race-card');
+      if (remaining.length === 0) showEmpty();
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Mode state ───────────────────────────────────────────
+    let currentMode = 'own'; // 'shared' | 'own' | 'empty'
+    let urlIds = [];
+
+    function getUrlIds() {
+      const params = new URLSearchParams(window.location.search);
+      const races = params.get('races');
+      if (!races || !races.trim()) return [];
+      return races.split(',').filter(Boolean);
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Banner actions ───────────────────────────────────────
+    function dismissBanner() {
+      document.getElementById('seasonBanner').style.display = 'none';
+    }
+
+    function addAllToSeason() {
+      let saved = getSaved();
+      urlIds.forEach(id => { if (!saved.includes(id)) saved.push(id); });
+      try { localStorage.setItem('savedRaces', JSON.stringify(saved)); } catch {}
+      history.replaceState({}, '', window.location.pathname);
+      urlIds = [];
+      currentMode = 'own';
+      dismissBanner();
+      updateSeasonCount();
+      const ownRaces = allRaces.filter(r => getSaved().includes(r.id));
+      renderRaces(ownRaces);
+      updateSubtitle(ownRaces.length, 'own');
+      updateShareButton(ownRaces.length);
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Share button ─────────────────────────────────────────
+    function shareMyseason() {
+      const ids = getSaved();
+      const url = window.location.origin + window.location.pathname + '?races=' + ids.join(',');
+      const btn = document.getElementById('shareBtn');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          btn.textContent = 'Ссылка скопирована ✓';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Поделиться сезоном`;
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      } else {
+        prompt('Скопируй ссылку:', url);
+      }
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Subtitle & share button helpers ─────────────────────
+    function updateSubtitle(count, mode) {
+      const el = document.getElementById('savedSubtitle');
+      if (mode === 'shared') {
+        el.textContent = `${count} ${pluralRaces(count)} — чужой сезон`;
+      } else if (count > 0) {
+        el.textContent = `${count} ${pluralRaces(count)} в твоём сезоне`;
+      } else {
+        el.textContent = 'Сохраняй гонки из календаря — они появятся здесь';
+      }
+    }
+    function updateShareButton(count) {
+      document.getElementById('shareWrap').style.display = count > 0 ? '' : 'none';
+    }
+    function pluralRaces(n) {
+      if (n % 10 === 1 && n % 100 !== 11) return 'гонка';
+      if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) return 'гонки';
+      return 'гонок';
+    }
+    // ────────────────────────────────────────────────────────
+
+    // ── Init ─────────────────────────────────────────────────
+    async function init() {
+      urlIds = getUrlIds();
+      const localIds = getSaved();
+
+      if (urlIds.length > 0) {
+        currentMode = 'shared';
+      } else if (localIds.length === 0) {
+        currentMode = 'empty';
+      } else {
+        currentMode = 'own';
+      }
+
+      try {
+        const [disciplines, locations, races] = await Promise.all([
+          fetchAll('Disciplines'),
+          fetchAll('Locations'),
+          fetchAll('Races'),
+        ]);
+
+        disciplines.forEach(r => { disciplineMap[r.id] = r.fields['Discipline Name'] || ''; });
+        locations.forEach(r => { locationMap[r.id] = r.fields['City'] || r.fields['Location Name'] || ''; });
+        allRaces = races;
+
+        if (currentMode === 'empty') {
+          showEmpty();
+          updateSubtitle(0, 'own');
+          updateSeasonCount();
+          return;
+        }
+
+        const ids = currentMode === 'shared' ? urlIds : localIds;
+        const filtered = allRaces.filter(r => ids.includes(r.id));
+
+        renderRaces(filtered);
+        updateSubtitle(filtered.length, currentMode);
+        updateSeasonCount();
+
+        if (currentMode === 'shared') {
+          document.getElementById('seasonBanner').style.display = '';
+          document.getElementById('shareWrap').style.display = 'none';
+        } else {
+          updateShareButton(filtered.length);
+        }
+
+      } catch (err) {
+        document.getElementById('savedContent').innerHTML =
+          `<div class="empty"><p>Не удалось загрузить данные. Обновите страницу.</p></div>`;
+        console.error('Airtable error:', err);
+      }
+    }
+
+    init();
+  </script>
+
+</body>
+</html>
