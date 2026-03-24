@@ -28,15 +28,6 @@
 </head>
 <body>
 
-  <!-- Shared season banner (hidden by default, shown in shared mode) -->
-  <div class="season-banner" id="seasonBanner" style="display:none">
-    <span>Это чужой сезон — хочешь добавить все эти гонки в свой?</span>
-    <span class="season-banner-actions">
-      <button class="season-banner-btn" onclick="addAllToSeason()">Добавить все</button>
-      <button class="season-banner-close" onclick="dismissBanner()" aria-label="Закрыть">✕</button>
-    </span>
-  </div>
-
   <header class="header">
     <div class="container header-inner">
       <a href="index.html" class="logo" style="text-decoration:none">RaceDay</a>
@@ -53,6 +44,15 @@
       </nav>
     </div>
   </header>
+
+  <!-- Shared season banner (hidden by default, shown in shared mode) -->
+  <div class="season-banner" id="seasonBanner" style="display:none">
+    <span>Это чужой сезон — хочешь добавить все эти гонки в свой?</span>
+    <span class="season-banner-actions">
+      <button class="season-banner-btn" onclick="addAllToSeason()">Добавить все</button>
+      <button class="season-banner-close" onclick="dismissBanner()" aria-label="Закрыть">✕</button>
+    </span>
+  </div>
 
   <section class="saved-hero">
     <div class="container">
