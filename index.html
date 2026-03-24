@@ -202,9 +202,11 @@
       const card = document.querySelector(`.race-card[data-race-id="${id}"]`);
       if (card) {
         const btn = card.querySelector('.race-save-btn');
-        const nowSaved = saved.includes(id);
-        btn.classList.toggle('saved', nowSaved);
-        btn.setAttribute('aria-label', nowSaved ? 'Убрать из сохранённых' : 'Сохранить');
+        if (btn) {
+          const nowSaved = saved.includes(id);
+          btn.classList.toggle('saved', nowSaved);
+          btn.setAttribute('aria-label', nowSaved ? 'Убрать из сохранённых' : 'Сохранить');
+        }
       }
       updateSeasonCount();
     }
