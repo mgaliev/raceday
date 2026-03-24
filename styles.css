@@ -519,7 +519,7 @@ body {
   transition: background 0.15s;
 }
 
-.share-btn:hover { background: #003DB3; }
+.share-btn:hover { background: var(--accent-dark); }
 
 .share-btn.copied { background: #2e7d32; }
 
@@ -574,4 +574,4 @@ body {
   transition: background 0.15s;
 }
 
-.saved-empty-cta:hover { background: #003DB3; }
+.saved-empty-cta:hover { background: var(--accent-dark); }
