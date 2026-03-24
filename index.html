@@ -124,6 +124,7 @@
           </svg>
           <span class="header-email-text">r4ceday@yandex.com</span>
         </a>
+        <a href="saved.html" class="header-link" id="seasonLink">Мой сезон</a>
       </nav>
     </div>
   </header>
@@ -182,6 +183,37 @@
     const AIRTABLE_TOKEN = 'patAljGLbreWlHUVA.f5816ce1d7b4e0de450f040b88df2e16a817fe82e966555006c02115f8256ffd';
     const AIRTABLE_BASE  = 'app2Ho3VmHJhOW63x';
     const AIRTABLE_TABLE = 'Races';
+
+    // ── Saved races (localStorage) ──────────────────────────────
+    function getSaved() {
+      try { return JSON.parse(localStorage.getItem('savedRaces') || '[]'); }
+      catch { return []; }
+    }
+    function isSaved(id) { return getSaved().includes(id); }
+    function toggleSaved(id) {
+      let saved = getSaved();
+      if (saved.includes(id)) {
+        saved = saved.filter(x => x !== id);
+      } else {
+        saved.push(id);
+      }
+      try { localStorage.setItem('savedRaces', JSON.stringify(saved)); } catch {}
+      // Update button on this card
+      const card = document.querySelector(`.race-card[data-race-id="${id}"]`);
+      if (card) {
+        const btn = card.querySelector('.race-save-btn');
+        const nowSaved = saved.includes(id);
+        btn.classList.toggle('saved', nowSaved);
+        btn.setAttribute('aria-label', nowSaved ? 'Убрать из сохранённых' : 'Сохранить');
+      }
+      updateSeasonCount();
+    }
+    function updateSeasonCount() {
+      const count = getSaved().length;
+      const link = document.getElementById('seasonLink');
+      if (link) link.textContent = count > 0 ? `Мой сезон (${count})` : 'Мой сезон';
+    }
+    // ────────────────────────────────────────────────────────────
 
     const MONTHS_ORDER = [
       'январь','февраль','март','апрель','май','июнь',
@@ -394,6 +426,7 @@
         renderMonthSelect();
         initSearch();
         render();
+        updateSeasonCount();
       } catch (err) {
         document.getElementById('calendarContent').innerHTML =
           `<div class="empty"><p>Не удалось загрузить данные. Обновите страницу.</p></div>`;
