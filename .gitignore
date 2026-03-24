@@ -8,3 +8,14 @@ data/
 # AI assistant instructions
 CLAUDE.md
 .claude/
+
+# Git worktrees
+.worktrees/
+
+# Python
+__pycache__/
+*.pyc
+
+# Local-only tools (not for public repo)
+scripts/
+tests/

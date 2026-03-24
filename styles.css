@@ -63,6 +63,31 @@ body {
 
 .header-link:hover { color: var(--accent); }
 
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.header-email svg {
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.header-email:hover svg {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .header-email-text { display: none; }
+}
+
 /* ── Hero ────────────────────────────────── */
 
 .hero {
