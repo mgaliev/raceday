@@ -21,6 +21,7 @@
   <meta property="og:description" content="Персональный календарь любительских велогонок России 2026.">
   <meta property="og:url" content="https://raceday-russia.ru/saved.html">
   <meta property="og:type" content="website">
+  <meta name="robots" content="noindex, nofollow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -30,7 +31,7 @@
 
   <header class="header">
     <div class="container header-inner">
-      <a href="index.html" class="logo" style="text-decoration:none">RaceDay</a>
+      <a href="index.html" class="logo">RaceDay</a>
       <nav class="header-nav">
         <a href="index.html" class="header-link">Все старты</a>
         <a href="mailto:r4ceday@yandex.com" class="header-link header-email">
@@ -406,7 +407,7 @@
           return;
         }
 
-        const ids = currentMode === 'shared' ? urlIds : localIds;
+        const ids = currentMode === 'shared' ? urlIds : getSaved();
         const filtered = allRaces.filter(r => ids.includes(r.id));
 
         renderRaces(filtered);
@@ -423,6 +424,7 @@
       } catch (err) {
         document.getElementById('savedContent').innerHTML =
           `<div class="empty"><p>Не удалось загрузить данные. Обновите страницу.</p></div>`;
+        document.getElementById('savedSubtitle').textContent = '';
         console.error('Airtable error:', err);
       }
     }

@@ -448,6 +448,9 @@ body {
 /* ── Shared season banner ────────────────── */
 
 .season-banner {
+  position: sticky;
+  top: 56px;
+  z-index: 99;
   background: #fffbe6;
   border-bottom: 1px solid #ffe58f;
   padding: 10px 0;
