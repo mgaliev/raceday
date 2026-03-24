@@ -195,6 +195,7 @@
         saved = saved.filter(x => x !== id);
       } else {
         saved.push(id);
+        ym(107730862, 'reachGoal', 'race_saved');
       }
       try { localStorage.setItem('savedRaces', JSON.stringify(saved)); } catch {}
       // Update button on this card
@@ -357,7 +358,7 @@
             </div>
           </div>
           ${hasLink
-            ? `<a class="race-link" href="${link}" target="_blank" rel="noopener">Регистрация →</a>`
+            ? `<a class="race-link" href="${link}" target="_blank" rel="noopener" onclick="ym(107730862,'reachGoal','registration_click')">Регистрация →</a>`
             : `<span class="race-link-empty">Скоро</span>`}
           <button class="race-save-btn${saved ? ' saved' : ''}"
                   onclick="toggleSaved('${r.id}')"

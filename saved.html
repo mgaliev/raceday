@@ -110,6 +110,7 @@
         saved = saved.filter(x => x !== id);
       } else {
         saved.push(id);
+        ym(107730862, 'reachGoal', 'race_saved');
       }
       try { localStorage.setItem('savedRaces', JSON.stringify(saved)); } catch {}
       const card = document.querySelector(`.race-card[data-race-id="${id}"]`);
@@ -342,6 +343,7 @@
       const btn = document.getElementById('shareBtn');
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).then(() => {
+          ym(107730862, 'reachGoal', 'season_shared');
           btn.textContent = 'Ссылка скопирована ✓';
           btn.classList.add('copied');
           setTimeout(() => {
