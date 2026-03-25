@@ -411,15 +411,31 @@
 
       const sortedMonths = Object.keys(byMonth).sort((a, b) => monthIdx(a) - monthIdx(b));
 
-      content.innerHTML = sortedMonths.map(m => `
-        <div class="month-group">
-          <div class="month-header">${MONTHS_DISPLAY[m] || m}</div>
-          <div class="race-list">${byMonth[m]
-            .slice()
-            .sort((a, b) => getDay(a.fields['Date']) - getDay(b.fields['Date']))
-            .map(r => renderCard(r)).join('')}</div>
-        </div>`
-      ).join('');
+      const curMonthIdx = new Date().getMonth(); // 0-based; 2026-only assumption
+      const pastMonths = sortedMonths.filter(m => monthIdx(m) < curMonthIdx);
+      const upcomingMonths = sortedMonths.filter(m => monthIdx(m) >= curMonthIdx);
+      const pastCount = pastMonths.reduce((sum, m) => sum + byMonth[m].length, 0);
+
+      let html = '';
+
+      if (pastMonths.length > 0) {
+        html += `
+          <div class="past-section">
+            <button type="button" class="past-toggle" onclick="togglePast(this)" aria-expanded="false">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+              Прошедшие старты · ${pastCount}
+            </button>
+            <div class="past-months" hidden>
+              ${pastMonths.map(m => renderMonthGroup(m, byMonth[m])).join('')}
+            </div>
+          </div>`;
+      }
+
+      html += upcomingMonths.map(m => renderMonthGroup(m, byMonth[m])).join('');
+      content.innerHTML = html;
     }
 
     async function fetchAll(tableName) {
