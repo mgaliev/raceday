@@ -267,6 +267,7 @@ body {
   padding: 10px 14px;
   cursor: pointer;
   color: var(--text-3);
+  font-family: inherit;
   font-size: 0.8125rem;
   font-weight: 500;
   width: 100%;
