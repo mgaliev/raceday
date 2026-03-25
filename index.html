@@ -370,6 +370,25 @@
         </div>`;
     }
 
+    function renderMonthGroup(m, races) {
+      return `
+        <div class="month-group">
+          <div class="month-header">${MONTHS_DISPLAY[m] || m}</div>
+          <div class="race-list">${races
+            .slice()
+            .sort((a, b) => getDay(a.fields['Date']) - getDay(b.fields['Date']))
+            .map(r => renderCard(r)).join('')}</div>
+        </div>`;
+    }
+
+    function togglePast(btn) {
+      const section = btn.closest('.past-section').querySelector('.past-months');
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      section.hidden = expanded;
+      btn.classList.toggle('open', !expanded);
+    }
+
     function render() {
       const races = filtered();
       const total = allRaces.length;
