@@ -435,6 +435,9 @@
       }
 
       html += upcomingMonths.map(m => renderMonthGroup(m, byMonth[m])).join('');
+      if (upcomingMonths.length === 0 && pastMonths.length > 0) {
+        html += `<div class="empty"><p>Все старты сезона уже прошли.</p></div>`;
+      }
       content.innerHTML = html;
     }
 
