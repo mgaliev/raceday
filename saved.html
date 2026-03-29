@@ -113,47 +113,67 @@
       font-style: italic;
     }
 
-    /* ── Month grid ──────────────────────────────────────────── */
-    .months-grid {
+    /* ── Month strips (Variant B) ───────────────────────────── */
+    .months-strips {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 9px;
-      align-items: stretch;
-      grid-auto-rows: minmax(52px, auto);
+      grid-template-columns: 1fr;
+      gap: 4px;
     }
-    @media (max-width: 680px) { .months-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 400px) { .months-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 580px) {
+      .months-strips {
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+        gap: 4px 24px;
+      }
+    }
 
-    .month-cell {
-      border-radius: 10px;
-      padding: 9px 9px 5px;
-    }
-    .month-cell.has-races {
-      background: #fff;
-      border: 1.5px solid #c7d2fe;
-    }
-    .month-cell.has-races:hover { border-color: var(--accent); }
-    .month-cell.is-empty {
-      background: #fafafa;
-      border: 1.5px dashed #e5e7eb;
+    /* Empty month = thin line */
+    .month-strip.is-empty {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 22px;
       opacity: 0.5;
     }
-    .month-cell-head {
+    .ms-name-empty {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      white-space: nowrap;
+      min-width: 26px;
+    }
+    .ms-divider {
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+
+    /* Active month = card */
+    .month-strip.has-races {
+      background: #fff;
+      border: 1.5px solid #c7d2fe;
+      border-radius: 10px;
+      padding: 9px 10px 5px;
+    }
+    .month-strip.has-races:hover { border-color: var(--accent); }
+    .ms-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 5px;
     }
-    .month-abbr {
+    .ms-name-active {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 0.6rem;
       font-weight: 700;
       letter-spacing: 0.13em;
       text-transform: uppercase;
+      color: var(--accent);
     }
-    .month-cell.has-races .month-abbr { color: var(--accent); }
-    .month-cell.is-empty  .month-abbr { color: #9ca3af; }
-    .month-badge {
+    .ms-badge {
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 0.58rem;
       font-weight: 700;
@@ -465,18 +485,18 @@
     .sk-line.md { height: 14px; width: 38%; }
     .sk-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 9px;
+      grid-template-columns: 1fr;
+      gap: 4px;
       margin-top: 32px;
     }
-    @media (max-width: 680px) { .sk-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 400px) { .sk-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 580px) { .sk-grid { grid-template-columns: 1fr 1fr; gap: 4px 24px; } }
     .sk-cell {
-      height: 76px;
       background: #f0f0f5;
       border-radius: 10px;
       animation: sk-pulse 1.4s ease-in-out infinite;
     }
+    .sk-cell.sk-active { height: 76px; }
+    .sk-cell.sk-empty  { height: 22px; border-radius: 4px; }
     .sk-cell:nth-child(2n) { animation-delay: 0.2s; }
     .sk-cell:nth-child(3n) { animation-delay: 0.4s; }
     @keyframes sk-pulse {
@@ -526,10 +546,10 @@
         <div class="sk-line xl"></div>
         <div class="sk-line md"></div>
         <div class="sk-grid">
-          <div class="sk-cell"></div><div class="sk-cell"></div>
-          <div class="sk-cell"></div><div class="sk-cell"></div>
-          <div class="sk-cell"></div><div class="sk-cell"></div>
-          <div class="sk-cell"></div><div class="sk-cell"></div>
+          <div class="sk-cell sk-active"></div><div class="sk-cell sk-empty"></div>
+          <div class="sk-cell sk-empty"></div><div class="sk-cell sk-active"></div>
+          <div class="sk-cell sk-active"></div><div class="sk-cell sk-empty"></div>
+          <div class="sk-cell sk-empty"></div><div class="sk-cell sk-active"></div>
         </div>
       </div>
 
@@ -549,7 +569,7 @@
             <h2 class="s-section-title" id="rhythmTitle">Ритм сезона</h2>
             <span class="s-section-hint">Пустые месяцы — время добавить гонки</span>
           </div>
-          <div class="months-grid" id="monthsGrid" role="list" aria-label="Гонки по месяцам"></div>
+          <div class="months-strips" id="monthsGrid" role="list" aria-label="Гонки по месяцам"></div>
         </section>
 
         <!-- Geography -->
@@ -844,11 +864,16 @@
     document.getElementById('monthsGrid').innerHTML = MONTHS_ORDER.map((month, i) => {
       const list = byMonth[month].slice().sort(sortByDate);
       const has  = list.length > 0;
+      if (!has) return `
+        <div class="month-strip is-empty" role="listitem" aria-label="${month} — нет гонок">
+          <span class="ms-name-empty">${MONTH_ABBR[i]}</span>
+          <div class="ms-divider"></div>
+        </div>`;
       return `
-        <div class="month-cell ${has ? 'has-races' : 'is-empty'}" role="listitem">
-          <div class="month-cell-head">
-            <span class="month-abbr">${MONTH_ABBR[i]}</span>
-            ${has ? `<span class="month-badge">${list.length}</span>` : ''}
+        <div class="month-strip has-races" role="listitem">
+          <div class="ms-head">
+            <span class="ms-name-active">${MONTH_ABBR[i]}</span>
+            <span class="ms-badge">${list.length}</span>
           </div>
           ${list.map(r => renderMRace(r, mode)).join('')}
         </div>`;
