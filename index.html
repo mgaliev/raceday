@@ -114,7 +114,7 @@
 
   <header class="header">
     <div class="container header-inner">
-      <span class="logo">RaceDay</span>
+      <a href="/" class="logo">RaceDay</a>
       <nav class="header-nav">
         <a href="mailto:r4ceday@yandex.com" class="header-link header-email">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -157,7 +157,7 @@
 
   <main class="calendar" id="calendar">
     <div class="container">
-      <div id="calendarContent">
+      <div id="calendarContent" aria-live="polite" aria-atomic="false">
         <div class="skeleton-wrap">
           <div class="skeleton-month"></div>
           <div class="skeleton-card"></div>
@@ -507,7 +507,11 @@
 
     function initSearch() {
       const el = document.getElementById('searchInput');
-      el.oninput = () => { activeFilter.search = el.value.trim(); render(); };
+      let searchTimer;
+      el.oninput = () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => { activeFilter.search = el.value.trim(); render(); }, 150);
+      };
     }
 
     function renderMonthSelect() {
