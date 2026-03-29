@@ -263,7 +263,7 @@
     .geo-group { margin-bottom: 28px; }
     .geo-city-head {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       margin-bottom: 10px;
     }
@@ -282,6 +282,8 @@
       color: var(--text-2);
       border-radius: 20px;
       padding: 1px 8px;
+      flex-shrink: 0;
+      margin-top: 2px;
     }
 
     /* Full card */
@@ -347,6 +349,7 @@
     @media (max-width: 500px) {
       .geo-card { flex-direction: column; }
       .geo-card-actions { flex-direction: row; flex-wrap: wrap; align-items: center; }
+      .geo-card-actions .btn-invite-full { flex: 1; }
     }
     .btn-invite-full {
       font-family: 'Barlow Condensed', sans-serif;
