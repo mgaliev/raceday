@@ -120,10 +120,27 @@
       gap: 4px;
     }
     @media (min-width: 580px) {
+      /* Desktop: revert to 4-column grid */
       .months-strips {
-        grid-template-columns: 1fr 1fr;
-        align-items: start;
-        gap: 4px 24px;
+        grid-template-columns: repeat(4, 1fr);
+        align-items: stretch;
+        grid-auto-rows: minmax(52px, auto);
+        gap: 9px;
+      }
+      .month-strip.is-empty {
+        display: block;
+        height: auto;
+        background: #fafafa;
+        border: 1.5px dashed #e5e7eb;
+        border-radius: 10px;
+        padding: 9px 10px 5px;
+      }
+      .ms-divider { display: none; }
+      .ms-name-empty {
+        display: block;
+        font-size: 0.6rem;
+        color: #9ca3af;
+        letter-spacing: 0.13em;
       }
     }
 
@@ -489,7 +506,10 @@
       gap: 4px;
       margin-top: 32px;
     }
-    @media (min-width: 580px) { .sk-grid { grid-template-columns: 1fr 1fr; gap: 4px 24px; } }
+    @media (min-width: 580px) {
+      .sk-grid { grid-template-columns: repeat(4, 1fr); gap: 9px; }
+      .sk-cell.sk-active, .sk-cell.sk-empty { height: 76px; border-radius: 10px; }
+    }
     .sk-cell {
       background: #f0f0f5;
       border-radius: 10px;
