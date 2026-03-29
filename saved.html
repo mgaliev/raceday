@@ -22,10 +22,464 @@
   <meta property="og:url" content="https://raceday-russia.ru/saved.html">
   <meta property="og:type" content="website">
   <meta name="robots" content="noindex, nofollow">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Season page ─────────────────────────────────────────── */
+
+    .season-hero {
+      padding: 40px 0 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .season-eyebrow {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 10px;
+    }
+    .season-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 0.92;
+      color: var(--text);
+      margin-bottom: 28px;
+    }
+    .season-title .year { color: var(--accent); }
+
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      gap: 0;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      padding-right: 20px;
+      margin-right: 20px;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+    .stat-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .stat-item.range .stat-num {
+      font-size: 1.05rem;
+      color: var(--text-2);
+      letter-spacing: 0.01em;
+    }
+    .stat-label {
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 3px;
+    }
+
+    /* ── Sections ────────────────────────────────────────────── */
+    .s-section { padding-top: 44px; }
+    .s-section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .s-section-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .s-section-hint {
+      font-size: 0.675rem;
+      color: var(--text-3);
+      font-style: italic;
+    }
+
+    /* ── Month grid ──────────────────────────────────────────── */
+    .months-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 9px;
+    }
+    @media (max-width: 680px) { .months-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 400px) { .months-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .month-cell {
+      border-radius: 10px;
+      padding: 9px 9px 5px;
+    }
+    .month-cell.has-races {
+      background: #fff;
+      border: 1.5px solid #c7d2fe;
+    }
+    .month-cell.has-races:hover { border-color: var(--accent); }
+    .month-cell.is-empty {
+      background: #fafafa;
+      border: 1.5px dashed #e5e7eb;
+      opacity: 0.5;
+      min-height: 52px;
+    }
+    .month-cell-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .month-abbr {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+    .month-cell.has-races .month-abbr { color: var(--accent); }
+    .month-cell.is-empty  .month-abbr { color: #9ca3af; }
+    .month-badge {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.58rem;
+      font-weight: 700;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 20px;
+      padding: 1px 5px;
+      line-height: 1.5;
+    }
+
+    /* Race row in month cell */
+    .mrace {
+      border-top: 1px solid #f0f0f5;
+      padding: 5px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .mrace-body { flex: 1; min-width: 0; }
+    .mrace-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mrace-meta {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 2px;
+      flex-wrap: wrap;
+    }
+    .mrace-date {
+      font-size: 0.58rem;
+      color: var(--text-3);
+      white-space: nowrap;
+    }
+    .cat-pill {
+      font-size: 0.52rem;
+      font-weight: 600;
+      padding: 1px 4px;
+      border-radius: 3px;
+      white-space: nowrap;
+      max-width: 88px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.5;
+    }
+    .mrace-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex-shrink: 0;
+      align-items: center;
+    }
+    .btn-invite-sm {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #F97316;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      padding: 2px 5px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+      line-height: 1.5;
+    }
+    .btn-invite-sm:hover { opacity: 0.85; }
+    .btn-invite-sm:focus-visible { outline: 2px solid #F97316; outline-offset: 1px; }
+    .btn-rm-sm {
+      background: none;
+      border: none;
+      color: #d1d5db;
+      cursor: pointer;
+      padding: 1px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      min-height: 18px;
+      transition: color 0.15s;
+    }
+    .btn-rm-sm:hover { color: #ef4444; }
+    .btn-rm-sm:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    /* ── Geography ───────────────────────────────────────────── */
+    .geo-summary {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-2);
+      padding: 12px 16px;
+      background: var(--bg-2);
+      border-radius: 8px;
+      border-left: 3px solid var(--accent);
+      margin-bottom: 24px;
+    }
+    .geo-group { margin-bottom: 28px; }
+    .geo-city-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .geo-city-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--text-3);
+    }
+    .geo-city-count {
+      font-size: 0.62rem;
+      font-weight: 700;
+      background: #f1f5f9;
+      color: var(--text-2);
+      border-radius: 20px;
+      padding: 1px 8px;
+    }
+
+    /* Full card */
+    .geo-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: #fff;
+      margin-bottom: 8px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .geo-card:hover {
+      border-color: #93c5fd;
+      box-shadow: 0 2px 8px rgba(0,87,255,0.07);
+    }
+    .geo-card-main { flex: 1; min-width: 0; }
+    .geo-card-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .geo-card-loc {
+      font-size: 0.73rem;
+      color: var(--text-2);
+      font-weight: 500;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .geo-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .geo-card-date {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+    .cat-pill-full {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+    .geo-card-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    @media (max-width: 500px) {
+      .geo-card { flex-direction: column; }
+      .geo-card-actions { flex-direction: row; flex-wrap: wrap; align-items: center; }
+    }
+    .btn-invite-full {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      background: #F97316;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-invite-full:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-invite-full:active { transform: translateY(0); }
+    .btn-invite-full:focus-visible { outline: 2px solid #F97316; outline-offset: 2px; }
+    .btn-reg {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .btn-reg:hover { text-decoration: underline; }
+    .btn-rm-full {
+      background: none;
+      border: none;
+      color: #d1d5db;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      transition: color 0.15s, background 0.15s;
+    }
+    .btn-rm-full:hover { color: #ef4444; background: #fef2f2; }
+    .btn-rm-full:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── Share area ──────────────────────────────────────────── */
+    .share-area {
+      padding: 40px 0 64px;
+      display: flex;
+      justify-content: center;
+    }
+    .btn-share {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s;
+    }
+    .btn-share:hover { background: var(--accent-dark); }
+    .btn-share.copied { background: #16a34a; }
+    .btn-share:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── Empty state ─────────────────────────────────────────── */
+    .s-empty {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .s-empty-icon { margin-bottom: 24px; color: #d1d5db; }
+    .s-empty-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+    .s-empty-sub {
+      font-size: 0.875rem;
+      color: var(--text-3);
+      margin-bottom: 32px;
+    }
+    .btn-empty-cta {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      display: inline-block;
+      transition: background 0.15s;
+    }
+    .btn-empty-cta:hover { background: var(--accent-dark); }
+    .btn-empty-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ── Skeleton ────────────────────────────────────────────── */
+    .sk-wrap { padding: 40px 0; }
+    .sk-line {
+      background: #f0f0f5;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      animation: sk-pulse 1.4s ease-in-out infinite;
+    }
+    .sk-line.xl { height: 52px; width: 55%; }
+    .sk-line.md { height: 14px; width: 38%; }
+    .sk-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 9px;
+      margin-top: 32px;
+    }
+    @media (max-width: 680px) { .sk-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 400px) { .sk-grid { grid-template-columns: repeat(2, 1fr); } }
+    .sk-cell {
+      height: 76px;
+      background: #f0f0f5;
+      border-radius: 10px;
+      animation: sk-pulse 1.4s ease-in-out infinite;
+    }
+    .sk-cell:nth-child(2n) { animation-delay: 0.2s; }
+    .sk-cell:nth-child(3n) { animation-delay: 0.4s; }
+    @keyframes sk-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+  </style>
 </head>
 <body>
 
@@ -46,7 +500,7 @@
     </div>
   </header>
 
-  <!-- Shared season banner (hidden by default, shown in shared mode) -->
+  <!-- Shared season banner -->
   <div class="season-banner" id="seasonBanner" style="display:none">
     <span>Это чужой сезон — хочешь добавить все эти гонки в свой?</span>
     <span class="season-banner-actions">
@@ -60,36 +514,82 @@
     </span>
   </div>
 
-  <section class="saved-hero">
+  <main>
     <div class="container">
-      <h1>Мой сезон</h1>
-      <p id="savedSubtitle">Загрузка…</p>
-    </div>
-  </section>
 
-  <main class="calendar" id="calendar">
-    <div class="container">
-      <div id="savedContent">
-        <!-- skeleton while loading -->
-        <div class="skeleton-wrap">
-          <div class="skeleton-month"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
+      <!-- Skeleton -->
+      <div id="loadingState" class="sk-wrap">
+        <div class="sk-line xl"></div>
+        <div class="sk-line md"></div>
+        <div class="sk-grid">
+          <div class="sk-cell"></div><div class="sk-cell"></div>
+          <div class="sk-cell"></div><div class="sk-cell"></div>
+          <div class="sk-cell"></div><div class="sk-cell"></div>
+          <div class="sk-cell"></div><div class="sk-cell"></div>
         </div>
       </div>
-      <!-- share button (own mode, hidden until ready) -->
-      <div class="share-wrap" id="shareWrap" style="display:none">
-        <button class="share-btn" id="shareBtn" onclick="shareMySeason()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-          </svg>
-          Поделиться сезоном
-        </button>
+
+      <!-- Main content -->
+      <div id="pageContent" style="display:none">
+
+        <!-- Hero -->
+        <section class="season-hero">
+          <div class="season-eyebrow" id="seasonEyebrow">Твой сезон</div>
+          <h1 class="season-title">Сезон <span class="year">2026</span></h1>
+          <div class="stats-row" id="statsRow"></div>
+        </section>
+
+        <!-- Season rhythm -->
+        <section class="s-section" aria-labelledby="rhythmTitle">
+          <div class="s-section-header">
+            <h2 class="s-section-title" id="rhythmTitle">Ритм сезона</h2>
+            <span class="s-section-hint">Пустые месяцы — время добавить гонки</span>
+          </div>
+          <div class="months-grid" id="monthsGrid" role="list" aria-label="Гонки по месяцам"></div>
+        </section>
+
+        <!-- Geography -->
+        <section class="s-section" aria-labelledby="geoTitle">
+          <div class="s-section-header">
+            <h2 class="s-section-title" id="geoTitle">География приключений</h2>
+          </div>
+          <div class="geo-summary" id="geoSummary"></div>
+          <div id="geoGroups"></div>
+        </section>
+
+        <!-- Share -->
+        <div class="share-area" id="shareArea" style="display:none">
+          <button class="btn-share" id="shareBtn" onclick="shareMySeason()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            Поделиться сезоном
+          </button>
+        </div>
+
+      </div><!-- /pageContent -->
+
+      <!-- Empty state -->
+      <div id="emptyState" style="display:none">
+        <div class="s-empty">
+          <div class="s-empty-icon" aria-hidden="true">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18.5" cy="17.5" r="3.5"/>
+              <circle cx="5.5" cy="17.5" r="3.5"/>
+              <circle cx="15" cy="5" r="1"/>
+              <path d="M12 17.5V14l-3-3 4-3 2 3h3"/>
+              <path d="M5.5 17.5L8 13l5-1"/>
+            </svg>
+          </div>
+          <h1 class="s-empty-title">Твой сезон 2026 пока пуст</h1>
+          <p class="s-empty-sub">Время планировать. Добавляй гонки из календаря.</p>
+          <a href="index.html" class="btn-empty-cta">Смотреть календарь →</a>
+        </div>
       </div>
-    </div>
+
+    </div><!-- /container -->
   </main>
 
   <footer class="footer">
@@ -100,350 +600,389 @@
   </footer>
 
   <script>
-    const AIRTABLE_TOKEN = 'patAljGLbreWlHUVA.f5816ce1d7b4e0de450f040b88df2e16a817fe82e966555006c02115f8256ffd';
-    const AIRTABLE_BASE  = 'app2Ho3VmHJhOW63x';
+  // ── Constants ─────────────────────────────────────────────────
+  const AIRTABLE_TOKEN = 'patAljGLbreWlHUVA.f5816ce1d7b4e0de450f040b88df2e16a817fe82e966555006c02115f8256ffd';
+  const AIRTABLE_BASE  = 'app2Ho3VmHJhOW63x';
 
-    // ── localStorage helpers ─────────────────────────────────
-    function getSaved() {
-      try { return JSON.parse(localStorage.getItem('savedRaces') || '[]'); }
-      catch { return []; }
-    }
-    function isSaved(id) { return getSaved().includes(id); }
-    function toggleSaved(id) {
-      let saved = getSaved();
-      if (saved.includes(id)) {
-        saved = saved.filter(x => x !== id);
-      } else {
-        saved.push(id);
-        ym(107730862, 'reachGoal', 'race_saved');
-      }
-      try { localStorage.setItem('savedRaces', JSON.stringify(saved)); } catch {}
-      const card = document.querySelector(`.race-card[data-race-id="${id}"]`);
-      if (card) {
-        const btn = card.querySelector('.race-save-btn');
-        if (btn) {
-          const nowSaved = saved.includes(id);
-          btn.classList.toggle('saved', nowSaved);
-          btn.setAttribute('aria-label', nowSaved ? 'Убрать из сохранённых' : 'Сохранить');
-          // In own mode: remove card from DOM on unsave
-          if (currentMode === 'own' && !nowSaved) {
-            card.closest('.race-list') && card.remove();
-            checkEmptyAfterRemoval();
-          }
-        }
-      }
-      updateSeasonCount();
-    }
-    function updateSeasonCount() {
-      const count = getSaved().length;
-      const link = document.getElementById('seasonLink');
-      if (link) link.textContent = count > 0 ? `Мой сезон (${count})` : 'Мой сезон';
-    }
-    // ────────────────────────────────────────────────────────
+  // ── Utils ─────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
 
-    // ── Airtable fetch ───────────────────────────────────────
-    async function fetchAll(tableName) {
-      const base = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(tableName)}`;
-      const headers = { Authorization: `Bearer ${AIRTABLE_TOKEN}` };
-      let records = [], offset = null;
-      do {
-        const params = new URLSearchParams({ pageSize: '100' });
-        if (offset) params.set('offset', offset);
-        const res = await fetch(`${base}?${params}`, { headers });
-        if (!res.ok) throw new Error(`${tableName}: ${res.status}`);
-        const data = await res.json();
-        records = records.concat(data.records);
-        offset = data.offset || null;
-      } while (offset);
-      return records;
-    }
-    // ────────────────────────────────────────────────────────
+  // ── localStorage ──────────────────────────────────────────────
+  function getSaved() {
+    try { return JSON.parse(localStorage.getItem('savedRaces') || '[]'); }
+    catch { return []; }
+  }
+  function writeSaved(ids) {
+    try { localStorage.setItem('savedRaces', JSON.stringify(ids)); } catch {}
+  }
+  function isSaved(id) { return getSaved().includes(id); }
+  function updateSeasonCount() {
+    const n = getSaved().length;
+    const el = document.getElementById('seasonLink');
+    if (el) el.textContent = n > 0 ? `Мой сезон (${n})` : 'Мой сезон';
+  }
 
-    // ── Lookup maps ──────────────────────────────────────────
-    let disciplineMap = {};
-    let locationMap   = {};
-    let allRaces      = [];
+  // ── Airtable ──────────────────────────────────────────────────
+  async function fetchAll(table) {
+    const base = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${encodeURIComponent(table)}`;
+    const hdr  = { Authorization: `Bearer ${AIRTABLE_TOKEN}` };
+    let records = [], offset = null;
+    do {
+      const p = new URLSearchParams({ pageSize: '100' });
+      if (offset) p.set('offset', offset);
+      const res = await fetch(`${base}?${p}`, { headers: hdr });
+      if (!res.ok) throw new Error(`${table}: ${res.status}`);
+      const d = await res.json();
+      records = records.concat(d.records);
+      offset = d.offset || null;
+    } while (offset);
+    return records;
+  }
 
-    function resolveDiscipline(ids) {
-      if (!ids || !ids.length) return '';
-      return ids.map(id => disciplineMap[id] || id).join(', ');
-    }
-    function resolveLocation(ids) {
-      if (!ids || !ids.length) return '';
-      return ids.map(id => locationMap[id] || id).join(', ');
-    }
-    // ────────────────────────────────────────────────────────
+  // ── Lookup maps ───────────────────────────────────────────────
+  let disciplineMap = {}, locationMap = {}, allRaces = [];
 
-    // ── Badge styles ─────────────────────────────────────────
-    const DISCIPLINE_COLORS = [
-      { key: 'гревел',      bg: '#e8f5e9', color: '#2e7d32' },
-      { key: 'mtb',         bg: '#fff3e0', color: '#e65100' },
-      { key: 'гран фондо',  bg: '#e3f2fd', color: '#1565c0' },
-      { key: 'шоссе',       bg: '#e3f2fd', color: '#1565c0' },
-      { key: 'велокросс',   bg: '#f3e5f5', color: '#6a1b9a' },
-      { key: 'многодневка', bg: '#fce4ec', color: '#c62828' },
-      { key: 'байкпакинг',  bg: '#e0f7fa', color: '#00695c' },
-      { key: 'бревет',      bg: '#f1f8e9', color: '#558b2f' },
-    ];
-    function badgeStyle(discipline) {
-      if (!discipline) return 'background:#f5f5f5;color:#666';
-      const d = discipline.toLowerCase();
-      for (const { key, bg, color } of DISCIPLINE_COLORS) {
-        if (d.includes(key)) return `background:${bg};color:${color}`;
-      }
-      return 'background:#f5f5f5;color:#666';
-    }
-    // ────────────────────────────────────────────────────────
+  function resolveDiscipline(ids) {
+    if (!ids || !ids.length) return '';
+    return ids.map(id => disciplineMap[id] || id).join(', ');
+  }
+  function resolveLocation(ids) {
+    if (!ids || !ids.length) return '';
+    return ids.map(id => locationMap[id] || id).join(', ');
+  }
 
-    // ── Render card ──────────────────────────────────────────
-    function renderCard(r) {
-      const f = r.fields;
-      const discipline = resolveDiscipline(f['Discipline']);
-      const location   = resolveLocation(f['Location']);
-      const link = f['Registration Link'];
-      const hasLink = link && link !== '-' && link !== '';
-      const saved = isSaved(r.id);
-      return `
-        <div class="race-card" data-race-id="${r.id}">
-          <div class="race-card-main">
-            <div class="race-name">${f['Race Name'] || '—'}</div>
-            <div class="race-meta">
-              <span class="race-badge" style="${badgeStyle(discipline)}">${discipline}</span>
-              <span class="race-date">${f['Date'] || ''}</span>
-              <span class="race-place">${location}</span>
-            </div>
-          </div>
-          ${hasLink
-            ? `<a class="race-link" href="${link}" target="_blank" rel="noopener">Регистрация →</a>`
-            : `<span class="race-link-empty">Скоро</span>`}
-          <button class="race-save-btn${saved ? ' saved' : ''}"
-                  onclick="toggleSaved('${r.id}')"
-                  aria-label="${saved ? 'Убрать из сохранённых' : 'Сохранить'}">
-            <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-            </svg>
-          </button>
-        </div>`;
+  // ── Category badge colors ─────────────────────────────────────
+  const CAT_COLORS = [
+    { key: 'гревел',      bg: '#dcfce7', color: '#15803d' },
+    { key: 'мтв',         bg: '#fff7ed', color: '#c2410c' },
+    { key: 'mtb',         bg: '#fff7ed', color: '#c2410c' },
+    { key: 'гран фондо',  bg: '#dbeafe', color: '#1d4ed8' },
+    { key: 'шоссе',       bg: '#eff6ff', color: '#1d4ed8' },
+    { key: 'велокросс',   bg: '#f3e8ff', color: '#7c3aed' },
+    { key: 'велофлешмоб', bg: '#e0f2fe', color: '#0369a1' },
+    { key: 'велозаезд',   bg: '#f0fdf4', color: '#166534' },
+    { key: 'байкпакинг',  bg: '#ecfdf5', color: '#065f46' },
+    { key: 'бревет',      bg: '#f0fdf4', color: '#166534' },
+    { key: 'многодневка', bg: '#fce7f3', color: '#9d174d' },
+  ];
+  function catStyle(cat) {
+    if (!cat) return 'background:#f5f5f5;color:#666';
+    const d = cat.toLowerCase();
+    for (const { key, bg, color } of CAT_COLORS) {
+      if (d.includes(key)) return `background:${bg};color:${color}`;
     }
-    // ────────────────────────────────────────────────────────
+    return 'background:#f5f5f5;color:#555';
+  }
 
-    // ── Date helpers (for sort) ──────────────────────────────
-    const MONTHS_ORDER = [
-      'январь','февраль','март','апрель','май','июнь',
-      'июль','август','сентябрь','октябрь','ноябрь','декабрь'
-    ];
-    const MONTH_STEMS = [
-      ['январ','январь'], ['феврал','февраль'], ['март','март'],
-      ['апрел','апрель'], ['мая','май'],         ['июн','июнь'],
-      ['июл','июль'],     ['август','август'],   ['сентябр','сентябрь'],
-      ['октябр','октябрь'],['ноябр','ноябрь'],  ['декабр','декабрь'],
-    ];
-    const MONTHS_DISPLAY = {
-      'январь':'Январь','февраль':'Февраль','март':'Март',
-      'апрель':'Апрель','май':'Май','июнь':'Июнь',
-      'июль':'Июль','август':'Август','сентябрь':'Сентябрь',
-      'октябрь':'Октябрь','ноябрь':'Ноябрь','декабрь':'Декабрь',
-      'без даты':'Дата уточняется'
+  // ── Date helpers ──────────────────────────────────────────────
+  const MONTHS_ORDER = [
+    'январь','февраль','март','апрель','май','июнь',
+    'июль','август','сентябрь','октябрь','ноябрь','декабрь'
+  ];
+  const MONTH_ABBR = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
+  const MONTH_SHORT = {
+    'январь':'Янв','февраль':'Фев','март':'Мар','апрель':'Апр','май':'Май','июнь':'Июн',
+    'июль':'Июл','август':'Авг','сентябрь':'Сен','октябрь':'Окт','ноябрь':'Ноя','декабрь':'Дек'
+  };
+  const MONTH_STEMS = [
+    ['январ','январь'],['феврал','февраль'],['март','март'],['апрел','апрель'],
+    ['мая','май'],['июн','июнь'],['июл','июль'],['август','август'],
+    ['сентябр','сентябрь'],['октябр','октябрь'],['ноябр','ноябрь'],['декабр','декабрь'],
+  ];
+  function getMonth(d) {
+    if (!d) return 'без даты';
+    const s = d.toLowerCase();
+    for (const [stem, c] of MONTH_STEMS) if (s.includes(stem)) return c;
+    return 'без даты';
+  }
+  function monthIdx(m) { const i = MONTHS_ORDER.indexOf(m); return i === -1 ? 999 : i; }
+  function getDay(d)   { if (!d) return 999; const m = d.match(/(\d+)/); return m ? +m[1] : 999; }
+  function sortByDate(a, b) {
+    const md = monthIdx(getMonth(a.fields['Date'])) - monthIdx(getMonth(b.fields['Date']));
+    return md !== 0 ? md : getDay(a.fields['Date']) - getDay(b.fields['Date']);
+  }
+
+  // ── Plural ────────────────────────────────────────────────────
+  function pl(n, f1, f2, f5) {
+    if (n % 10 === 1 && n % 100 !== 11) return f1;
+    if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) return f2;
+    return f5;
+  }
+  const plRaces  = n => pl(n, 'гонка', 'гонки', 'гонок');
+  const plCities = n => pl(n, 'город', 'города', 'городов');
+
+  // ── Invite ────────────────────────────────────────────────────
+  const inviteMap = {};
+  function inviteFriend(btn, key) {
+    const text = inviteMap[key];
+    if (!text) return;
+    ym(107730862, 'reachGoal', 'invite_friend_click');
+    const orig = btn.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(() => { btn.textContent = '✓ Скопировано'; setTimeout(() => { btn.textContent = orig; }, 1500); })
+        .catch(() => prompt('Скопируй:', text));
+    } else {
+      prompt('Скопируй:', text);
+    }
+  }
+
+  // ── Remove race ───────────────────────────────────────────────
+  function removeRace(id) {
+    const saved = getSaved().filter(x => x !== id);
+    writeSaved(saved);
+    updateSeasonCount();
+    const races = allRaces.filter(r => saved.includes(r.id));
+    if (races.length === 0) { showState('empty'); }
+    else { renderPage(races, 'own'); }
+  }
+
+  // ── Mode & state ──────────────────────────────────────────────
+  let currentMode = 'own', urlIds = [];
+  function getUrlIds() {
+    const v = new URLSearchParams(window.location.search).get('races');
+    return v ? v.split(',').filter(Boolean) : [];
+  }
+  function showState(s) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('pageContent').style.display  = s === 'content' ? '' : 'none';
+    document.getElementById('emptyState').style.display   = s === 'empty'   ? '' : 'none';
+  }
+
+  // ── Banner ────────────────────────────────────────────────────
+  function dismissBanner() { document.getElementById('seasonBanner').style.display = 'none'; }
+  function addAllToSeason() {
+    const saved = getSaved();
+    urlIds.forEach(id => { if (!saved.includes(id)) saved.push(id); });
+    writeSaved(saved);
+    history.replaceState({}, '', window.location.pathname);
+    urlIds = []; currentMode = 'own';
+    dismissBanner(); updateSeasonCount();
+    const races = allRaces.filter(r => getSaved().includes(r.id));
+    if (races.length === 0) showState('empty');
+    else renderPage(races, 'own');
+  }
+
+  // ── Share ─────────────────────────────────────────────────────
+  function shareMySeason() {
+    const url = location.origin + location.pathname + '?races=' + getSaved().join(',');
+    const btn = document.getElementById('shareBtn');
+    const done = () => {
+      ym(107730862, 'reachGoal', 'season_shared');
+      btn.textContent = 'Ссылка скопирована ✓';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Поделиться сезоном`;
+        btn.classList.remove('copied');
+      }, 2000);
     };
-    function getMonth(dateStr) {
-      if (!dateStr) return 'без даты';
-      const s = dateStr.toLowerCase();
-      for (const [stem, canonical] of MONTH_STEMS) {
-        if (s.includes(stem)) return canonical;
-      }
-      return 'без даты';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done).catch(() => prompt('Ссылка:', url));
+    } else {
+      prompt('Ссылка:', url); done();
     }
-    function monthIdx(m) {
-      const i = MONTHS_ORDER.indexOf(m);
-      return i === -1 ? 999 : i;
-    }
-    function getDay(dateStr) {
-      if (!dateStr) return 999;
-      const m = dateStr.match(/(\d+)/);
-      return m ? parseInt(m[1], 10) : 999;
-    }
-    // ────────────────────────────────────────────────────────
+  }
 
-    // ── Render race list ─────────────────────────────────────
-    function renderRaces(races) {
-      const content = document.getElementById('savedContent');
-      if (races.length === 0) {
-        showEmpty();
-        return;
-      }
-      const byMonth = {};
-      for (const r of races) {
-        const m = getMonth(r.fields['Date']);
-        if (!byMonth[m]) byMonth[m] = [];
-        byMonth[m].push(r);
-      }
-      const sortedMonths = Object.keys(byMonth).sort((a, b) => monthIdx(a) - monthIdx(b));
-      content.innerHTML = sortedMonths.map(m => `
-        <div class="month-group">
-          <div class="month-header">${MONTHS_DISPLAY[m] || m}</div>
-          <div class="race-list">${byMonth[m]
-            .slice()
-            .sort((a, b) => getDay(a.fields['Date']) - getDay(b.fields['Date']))
-            .map(r => renderCard(r)).join('')}</div>
-        </div>`
-      ).join('');
-    }
+  // ──────────────────────────────────────────────────────────────
+  //  Render
+  // ──────────────────────────────────────────────────────────────
+  function renderPage(races, mode) {
+    document.getElementById('seasonEyebrow').textContent = mode === 'shared' ? 'Сезон друга' : 'Твой сезон';
+    renderStats(races, mode);
+    renderMonthGrid(races, mode);
+    renderGeography(races, mode);
+    document.getElementById('shareArea').style.display = mode === 'own' ? '' : 'none';
+    showState('content');
+  }
 
-    function showEmpty() {
-      document.getElementById('savedContent').innerHTML = `
-        <div class="saved-empty">
-          <div class="saved-empty-icon" aria-hidden="true">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/>
-              <circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h3"/>
-              <path d="M5.5 17.5L8 13l5-1"/>
-            </svg>
+  // ── Stats ─────────────────────────────────────────────────────
+  function renderStats(races, mode) {
+    const cities = new Set(), months = new Set();
+    for (const r of races) {
+      const m = getMonth(r.fields['Date']);
+      if (m !== 'без даты') months.add(m);
+      const c = resolveLocation(r.fields['Location']);
+      if (c) cities.add(c);
+    }
+    const sm = [...months].sort((a,b) => monthIdx(a) - monthIdx(b));
+    let range = '';
+    if (sm.length >= 2)   range = `${MONTH_SHORT[sm[0]] || sm[0]} — ${MONTH_SHORT[sm[sm.length-1]] || sm[sm.length-1]}`;
+    else if (sm.length === 1) range = MONTH_SHORT[sm[0]] || sm[0];
+
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-item">
+        <span class="stat-num">${races.length}</span>
+        <span class="stat-label">${plRaces(races.length)}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">${cities.size}</span>
+        <span class="stat-label">${plCities(cities.size)}</span>
+      </div>
+      ${range ? `<div class="stat-item range">
+        <span class="stat-num">${esc(range)}</span>
+        <span class="stat-label">период</span>
+      </div>` : ''}
+    `;
+  }
+
+  // ── Month grid ────────────────────────────────────────────────
+  function renderMonthGrid(races, mode) {
+    const byMonth = {};
+    for (const m of MONTHS_ORDER) byMonth[m] = [];
+    for (const r of races) {
+      const m = getMonth(r.fields['Date']);
+      if (byMonth[m]) byMonth[m].push(r);
+    }
+    document.getElementById('monthsGrid').innerHTML = MONTHS_ORDER.map((month, i) => {
+      const list = byMonth[month].slice().sort(sortByDate);
+      const has  = list.length > 0;
+      return `
+        <div class="month-cell ${has ? 'has-races' : 'is-empty'}" role="listitem">
+          <div class="month-cell-head">
+            <span class="month-abbr">${MONTH_ABBR[i]}</span>
+            ${has ? `<span class="month-badge">${list.length}</span>` : ''}
           </div>
-          <h2>У тебя пока нет сохранённых гонок</h2>
-          <a href="index.html" class="saved-empty-cta">Смотреть календарь →</a>
+          ${list.map(r => renderMRace(r, mode)).join('')}
         </div>`;
-      document.getElementById('shareWrap').style.display = 'none';
+    }).join('');
+  }
+
+  function renderMRace(r, mode) {
+    const f    = r.fields;
+    const cat  = resolveDiscipline(f['Discipline']);
+    const city = resolveLocation(f['Location']);
+    const date = f['Date'] || '';
+    const link = f['Registration Link'];
+    const name = f['Race Name'] || '—';
+    const hasLink = link && link !== '-' && link !== '';
+    const key  = r.id + '_sm';
+    inviteMap[key] = hasLink
+      ? `Еду сюда: ${name}, ${city}, ${date} ${link}`
+      : `Еду сюда: ${name}, ${city}, ${date}`;
+    return `
+      <div class="mrace">
+        <div class="mrace-body">
+          <div class="mrace-name" title="${esc(name)}">${esc(name)}</div>
+          <div class="mrace-meta">
+            <span class="cat-pill" style="${catStyle(cat)}" title="${esc(cat)}">${esc(cat)}</span>
+            <span class="mrace-date">${esc(date)}</span>
+          </div>
+        </div>
+        <div class="mrace-btns">
+          <button class="btn-invite-sm" onclick="inviteFriend(this,'${key}')" aria-label="Позвать друга на ${esc(name)}">Еду →</button>
+          ${mode === 'own' ? `<button class="btn-rm-sm" onclick="removeRace('${r.id}')" aria-label="Убрать ${esc(name)} из сезона">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>` : ''}
+        </div>
+      </div>`;
+  }
+
+  // ── Geography ─────────────────────────────────────────────────
+  function renderGeography(races, mode) {
+    const cities = new Set();
+    for (const r of races) { const c = resolveLocation(r.fields['Location']); if (c) cities.add(c); }
+    const pfx = mode === 'shared' ? 'Этот сезон:' : 'Твой сезон:';
+    document.getElementById('geoSummary').textContent =
+      `${pfx} ${cities.size} ${plCities(cities.size)} · ${races.length} ${plRaces(races.length)}`;
+
+    const byCity = {};
+    for (const r of races) {
+      const c = resolveLocation(r.fields['Location']) || 'Город не указан';
+      if (!byCity[c]) byCity[c] = [];
+      byCity[c].push(r);
     }
+    const sorted = Object.keys(byCity).sort((a,b) => byCity[b].length - byCity[a].length);
+    document.getElementById('geoGroups').innerHTML = sorted.map(city => {
+      const list = byCity[city].slice().sort(sortByDate);
+      return `
+        <div class="geo-group">
+          <div class="geo-city-head">
+            <span class="geo-city-name">${esc(city)}</span>
+            <span class="geo-city-count">${list.length} ${plRaces(list.length)}</span>
+          </div>
+          ${list.map(r => renderGeoCard(r, mode)).join('')}
+        </div>`;
+    }).join('');
+  }
 
-    function checkEmptyAfterRemoval() {
-      const remaining = document.querySelectorAll('.race-card');
-      if (remaining.length === 0) {
-        showEmpty();
-        updateSubtitle(0, 'own');
-      }
-    }
-    // ────────────────────────────────────────────────────────
+  function renderGeoCard(r, mode) {
+    const f    = r.fields;
+    const cat  = resolveDiscipline(f['Discipline']);
+    const city = resolveLocation(f['Location']);
+    const date = f['Date'] || '';
+    const link = f['Registration Link'];
+    const name = f['Race Name'] || '—';
+    const hasLink = link && link !== '-' && link !== '';
+    const key  = r.id + '_full';
+    inviteMap[key] = hasLink
+      ? `Еду сюда: ${name}, ${city}, ${date} ${link}`
+      : `Еду сюда: ${name}, ${city}, ${date}`;
+    return `
+      <div class="geo-card">
+        <div class="geo-card-main">
+          <div class="geo-card-name">${esc(name)}</div>
+          <div class="geo-card-loc">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${esc(city)}
+          </div>
+          <div class="geo-card-meta">
+            <span class="cat-pill-full" style="${catStyle(cat)}">${esc(cat)}</span>
+            <span class="geo-card-date">${esc(date)}</span>
+          </div>
+        </div>
+        <div class="geo-card-actions">
+          <button class="btn-invite-full" onclick="inviteFriend(this,'${key}')" aria-label="Позвать друга на ${esc(name)}">Позвать друга</button>
+          ${hasLink
+            ? `<a class="btn-reg" href="${link}" target="_blank" rel="noopener">Регистрация →</a>`
+            : `<span style="font-size:0.65rem;color:var(--text-3)">Скоро</span>`}
+          ${mode === 'own' ? `<button class="btn-rm-full" onclick="removeRace('${r.id}')" aria-label="Убрать ${esc(name)} из сезона">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>` : ''}
+        </div>
+      </div>`;
+  }
 
-    // ── Mode state ───────────────────────────────────────────
-    let currentMode = 'own'; // 'shared' | 'own' | 'empty'
-    let urlIds = [];
+  // ──────────────────────────────────────────────────────────────
+  //  Init
+  // ──────────────────────────────────────────────────────────────
+  async function init() {
+    urlIds = getUrlIds();
+    const localIds = getSaved();
+    currentMode = urlIds.length > 0 ? 'shared' : localIds.length === 0 ? 'empty' : 'own';
 
-    function getUrlIds() {
-      const params = new URLSearchParams(window.location.search);
-      const races = params.get('races');
-      if (!races || !races.trim()) return [];
-      return races.split(',').filter(Boolean);
-    }
-    // ────────────────────────────────────────────────────────
+    if (currentMode === 'empty') { showState('empty'); updateSeasonCount(); return; }
 
-    // ── Banner actions ───────────────────────────────────────
-    function dismissBanner() {
-      document.getElementById('seasonBanner').style.display = 'none';
-    }
+    try {
+      const [disc, locs, races] = await Promise.all([
+        fetchAll('Disciplines'), fetchAll('Locations'), fetchAll('Races')
+      ]);
+      disc.forEach(r  => { disciplineMap[r.id] = r.fields['Discipline Name'] || ''; });
+      locs.forEach(r  => { locationMap[r.id]   = r.fields['City'] || r.fields['Location Name'] || ''; });
+      allRaces = races;
 
-    function addAllToSeason() {
-      let saved = getSaved();
-      urlIds.forEach(id => { if (!saved.includes(id)) saved.push(id); });
-      try { localStorage.setItem('savedRaces', JSON.stringify(saved)); } catch {}
-      history.replaceState({}, '', window.location.pathname);
-      urlIds = [];
-      currentMode = 'own';
-      dismissBanner();
+      const ids      = currentMode === 'shared' ? urlIds : getSaved();
+      const filtered = allRaces.filter(r => ids.includes(r.id));
       updateSeasonCount();
-      const ownRaces = allRaces.filter(r => getSaved().includes(r.id));
-      renderRaces(ownRaces);
-      updateSubtitle(ownRaces.length, 'own');
-      updateShareButton(ownRaces.length);
+
+      if (filtered.length === 0) { showState('empty'); return; }
+
+      renderPage(filtered, currentMode);
+      if (currentMode === 'shared') document.getElementById('seasonBanner').style.display = '';
+
+    } catch (err) {
+      document.getElementById('loadingState').innerHTML =
+        `<div style="text-align:center;padding:60px 0;color:var(--text-3)">
+          <p>Не удалось загрузить данные. <a href="javascript:location.reload()" style="color:var(--accent)">Обновить страницу</a></p>
+        </div>`;
+      console.error('Airtable error:', err);
     }
-    // ────────────────────────────────────────────────────────
+  }
 
-    // ── Share button ─────────────────────────────────────────
-    function shareMySeason() {
-      const ids = getSaved();
-      const url = window.location.origin + window.location.pathname + '?races=' + ids.join(',');
-      const btn = document.getElementById('shareBtn');
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(() => {
-          ym(107730862, 'reachGoal', 'season_shared');
-          btn.textContent = 'Ссылка скопирована ✓';
-          btn.classList.add('copied');
-          setTimeout(() => {
-            btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Поделиться сезоном`;
-            btn.classList.remove('copied');
-          }, 2000);
-        });
-      } else {
-        ym(107730862, 'reachGoal', 'season_shared');
-        prompt('Скопируй ссылку:', url);
-      }
-    }
-    // ────────────────────────────────────────────────────────
-
-    // ── Subtitle & share button helpers ─────────────────────
-    function updateSubtitle(count, mode) {
-      const el = document.getElementById('savedSubtitle');
-      if (mode === 'shared') {
-        el.textContent = `${count} ${pluralRaces(count)} — чужой сезон`;
-      } else if (count > 0) {
-        el.textContent = `${count} ${pluralRaces(count)} в твоём сезоне`;
-      } else {
-        el.textContent = 'Сохраняй гонки из календаря — они появятся здесь';
-      }
-    }
-    function updateShareButton(count) {
-      document.getElementById('shareWrap').style.display = count > 0 ? '' : 'none';
-    }
-    function pluralRaces(n) {
-      if (n % 10 === 1 && n % 100 !== 11) return 'гонка';
-      if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) return 'гонки';
-      return 'гонок';
-    }
-    // ────────────────────────────────────────────────────────
-
-    // ── Init ─────────────────────────────────────────────────
-    async function init() {
-      urlIds = getUrlIds();
-      const localIds = getSaved();
-
-      if (urlIds.length > 0) {
-        currentMode = 'shared';
-      } else if (localIds.length === 0) {
-        currentMode = 'empty';
-      } else {
-        currentMode = 'own';
-      }
-
-      try {
-        const [disciplines, locations, races] = await Promise.all([
-          fetchAll('Disciplines'),
-          fetchAll('Locations'),
-          fetchAll('Races'),
-        ]);
-
-        disciplines.forEach(r => { disciplineMap[r.id] = r.fields['Discipline Name'] || ''; });
-        locations.forEach(r => { locationMap[r.id] = r.fields['City'] || r.fields['Location Name'] || ''; });
-        allRaces = races;
-
-        if (currentMode === 'empty') {
-          showEmpty();
-          updateSubtitle(0, 'own');
-          updateSeasonCount();
-          return;
-        }
-
-        const ids = currentMode === 'shared' ? urlIds : getSaved();
-        const filtered = allRaces.filter(r => ids.includes(r.id));
-
-        renderRaces(filtered);
-        updateSubtitle(filtered.length, currentMode);
-        updateSeasonCount();
-
-        if (currentMode === 'shared') {
-          document.getElementById('seasonBanner').style.display = '';
-          document.getElementById('shareWrap').style.display = 'none';
-        } else {
-          updateShareButton(filtered.length);
-        }
-
-      } catch (err) {
-        document.getElementById('savedContent').innerHTML =
-          `<div class="empty"><p>Не удалось загрузить данные. Обновите страницу.</p></div>`;
-        document.getElementById('savedSubtitle').textContent = '';
-        console.error('Airtable error:', err);
-      }
-    }
-
-    init();
+  init();
   </script>
 
 </body>
