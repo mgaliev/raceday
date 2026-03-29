@@ -118,6 +118,8 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 9px;
+      align-items: stretch;
+      grid-auto-rows: minmax(52px, auto);
     }
     @media (max-width: 680px) { .months-grid { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 400px) { .months-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -135,7 +137,6 @@
       background: #fafafa;
       border: 1.5px dashed #e5e7eb;
       opacity: 0.5;
-      min-height: 52px;
     }
     .month-cell-head {
       display: flex;
