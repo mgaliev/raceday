@@ -577,6 +577,11 @@ body {
 
 .season-banner-close:hover { color: var(--text); }
 
+.season-banner-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ── Share button ────────────────────────── */
 
 .share-wrap {
