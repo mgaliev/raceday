@@ -775,6 +775,16 @@
     }
   }
 
+  // ── Equalize month cell heights on desktop ────────────────────
+  function equalizeMonthHeights() {
+    const cells = document.querySelectorAll('.month-strip');
+    cells.forEach(c => c.style.height = '');
+    if (window.innerWidth < 580) return;
+    let maxH = 0;
+    cells.forEach(c => { maxH = Math.max(maxH, c.offsetHeight); });
+    cells.forEach(c => c.style.height = maxH + 'px');
+  }
+
   // ── Remove race ───────────────────────────────────────────────
   function removeRace(id) {
     const saved = getSaved().filter(x => x !== id);
@@ -838,6 +848,7 @@
     document.getElementById('seasonEyebrow').textContent = mode === 'shared' ? 'Сезон друга' : 'Твой сезон';
     renderStats(races, mode);
     renderMonthGrid(races, mode);
+    requestAnimationFrame(equalizeMonthHeights);
     renderGeography(races, mode);
     document.getElementById('shareArea').style.display = mode === 'own' ? '' : 'none';
     showState('content');
@@ -1030,6 +1041,8 @@
       console.error('Airtable error:', err);
     }
   }
+
+  window.addEventListener('resize', equalizeMonthHeights);
 
   init();
   </script>
