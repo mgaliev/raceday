@@ -12,6 +12,12 @@ CLAUDE.md
 # Git worktrees
 .worktrees/
 
+# Superpowers plugin runtime data
+.superpowers/
+
+# Pytest cache
+.pytest_cache/
+
 # Python
 __pycache__/
 *.pyc
