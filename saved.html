@@ -950,7 +950,6 @@
         <div class="geo-group">
           <div class="geo-city-head">
             <span class="geo-city-name">${esc(city)}</span>
-            <span class="geo-city-count">${list.length} ${plRaces(list.length)}</span>
           </div>
           ${list.map(r => renderGeoCard(r, mode)).join('')}
         </div>`;
