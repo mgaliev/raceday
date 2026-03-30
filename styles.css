@@ -523,6 +523,19 @@ body {
 
 .race-save-btn.saved svg { fill: currentColor; }
 
+/* ── Race highlight (from shared ?race= link) ─ */
+
+@keyframes race-highlight {
+  0%   { border-color: transparent; box-shadow: none; background: var(--bg-2); }
+  15%  { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,87,255,0.12); background: rgba(0,87,255,0.04); }
+  80%  { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,87,255,0.12); background: rgba(0,87,255,0.04); }
+  100% { border-color: transparent; box-shadow: none; background: var(--bg-2); }
+}
+
+.race-card.race-highlight {
+  animation: race-highlight 2.5s ease-in-out forwards;
+}
+
 /* ── Shared season banner ────────────────── */
 
 .season-banner {
