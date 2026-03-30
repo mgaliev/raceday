@@ -528,13 +528,24 @@
     function highlightRaceFromUrl() {
       const id = new URLSearchParams(window.location.search).get('race');
       if (!id) return;
-      requestAnimationFrame(() => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
         const card = document.querySelector(`.race-card[data-race-id="${id}"]`);
         if (!card) return;
+        // Expand "past races" section if card is hidden inside it
+        const pastMonths = card.closest('.past-months');
+        if (pastMonths && pastMonths.hidden) {
+          pastMonths.hidden = false;
+          const toggle = pastMonths.closest('.past-section') &&
+            pastMonths.closest('.past-section').querySelector('.past-toggle');
+          if (toggle) {
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.classList.add('open');
+          }
+        }
         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
         card.classList.add('race-highlight');
         setTimeout(() => card.classList.remove('race-highlight'), 2500);
-      });
+      }));
     }
 
     init();
