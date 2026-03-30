@@ -763,16 +763,17 @@
   // ── Invite ────────────────────────────────────────────────────
   const inviteMap = {};
   function inviteFriend(btn, key) {
-    const text = inviteMap[key];
-    if (!text) return;
+    const id = inviteMap[key];
+    if (!id) return;
+    const url = 'https://raceday-russia.ru/?race=' + id;
     ym(107730862, 'reachGoal', 'invite_friend_click');
     const orig = btn.textContent;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text)
+      navigator.clipboard.writeText(url)
         .then(() => { btn.textContent = '✓ Скопировано'; setTimeout(() => { btn.textContent = orig; }, 1500); })
-        .catch(() => prompt('Скопируй:', text));
+        .catch(() => prompt('Ссылка:', url));
     } else {
-      prompt('Скопируй:', text);
+      prompt('Ссылка:', url);
     }
   }
 
@@ -910,9 +911,7 @@
     const name = f['Race Name'] || '—';
     const hasLink = link && link !== '-' && link !== '';
     const key  = r.id + '_sm';
-    inviteMap[key] = hasLink
-      ? `Еду сюда: ${name}, ${city}, ${date} ${link}`
-      : `Еду сюда: ${name}, ${city}, ${date}`;
+    inviteMap[key] = r.id;
     return `
       <div class="mrace">
         <div class="mrace-body">
@@ -967,9 +966,7 @@
     const name = f['Race Name'] || '—';
     const hasLink = link && link !== '-' && link !== '';
     const key  = r.id + '_full';
-    inviteMap[key] = hasLink
-      ? `Еду сюда: ${name}, ${city}, ${date} ${link}`
-      : `Еду сюда: ${name}, ${city}, ${date}`;
+    inviteMap[key] = r.id;
     return `
       <div class="geo-card">
         <div class="geo-card-main">
