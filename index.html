@@ -528,13 +528,13 @@
     function highlightRaceFromUrl() {
       const id = new URLSearchParams(window.location.search).get('race');
       if (!id) return;
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         const card = document.querySelector(`.race-card[data-race-id="${id}"]`);
         if (!card) return;
         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
         card.classList.add('race-highlight');
-        setTimeout(() => card.classList.remove('race-highlight'), 2600);
-      }, 120);
+        setTimeout(() => card.classList.remove('race-highlight'), 2500);
+      });
     }
 
     init();
