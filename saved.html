@@ -765,7 +765,7 @@
   function inviteFriend(btn, key) {
     const id = inviteMap[key];
     if (!id) return;
-    const url = 'https://raceday-russia.ru/?race=' + id;
+    const url = 'https://raceday-russia.ru/?race=' + id + '&utm_source=share&utm_medium=invite&utm_campaign=friend';
     ym(107730862, 'reachGoal', 'invite_friend_click');
     const orig = btn.textContent;
     if (navigator.clipboard && navigator.clipboard.writeText) {
