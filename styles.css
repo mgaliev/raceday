@@ -534,6 +534,14 @@ body {
 
 .race-card.race-highlight {
   animation: race-highlight 2.5s ease-in-out forwards;
+  transition: none;
+  will-change: border-color, box-shadow, background;
+}
+
+.race-card.race-highlight:hover {
+  background: rgba(0,87,255,0.04);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,87,255,0.12);
 }
 
 /* ── Shared season banner ────────────────── */
