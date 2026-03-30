@@ -578,7 +578,7 @@
 
         <!-- Hero -->
         <section class="season-hero">
-          <div class="season-eyebrow" id="seasonEyebrow">Твой сезон</div>
+          <div class="season-eyebrow" id="seasonEyebrow" style="display:none">Сезон друга</div>
           <h1 class="season-title">Сезон <span class="year">2026</span></h1>
           <div class="stats-row" id="statsRow"></div>
         </section>
@@ -835,7 +835,8 @@
   //  Render
   // ──────────────────────────────────────────────────────────────
   function renderPage(races, mode) {
-    document.getElementById('seasonEyebrow').textContent = mode === 'shared' ? 'Сезон друга' : 'Твой сезон';
+    const eyebrow = document.getElementById('seasonEyebrow');
+    eyebrow.style.display = mode === 'shared' ? '' : 'none';
     renderStats(races, mode);
     renderMonthGrid(races, mode);
     renderGeography(races, mode);
